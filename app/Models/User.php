@@ -14,6 +14,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The primary key for the model.
+     */
+    protected $primaryKey = 'user_id';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -22,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
