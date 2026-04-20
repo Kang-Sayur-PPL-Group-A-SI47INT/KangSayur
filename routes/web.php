@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+
     return view('welcome');
 });
 
@@ -20,3 +22,12 @@ Route::get('/farmer/dashboard', function () {
 })->middleware('auth')->name('farmer.dashboard');
 
 require __DIR__.'/auth.php';
+    $featuredListings = Listing::with(['farmer', 'produce', 'ratings'])
+        ->where('status', 'active')
+        ->orderBy('created_at', 'desc')
+        ->take(6)
+        ->get();
+
+    return view('welcome', compact('featuredListings'));
+})->name('home');
+

@@ -5,7 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+
         <title>{{ config('app.name', 'Kang Sayur') }}</title>
+
+        <title>{{ $title ?? 'Kang Sayur' }} — Kang Sayur</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +22,16 @@
         {{ $slot }}
 
         <!-- Alpine.js -->
+
+
+        <style>
+            * { font-family: 'Inter', sans-serif; }
+        </style>
+    </head>
+    <body class="font-sans antialiased bg-cream-100">
+        {{ $slot }}
+
+        <!-- Alpine.js for interactivity -->
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </body>
 </html>
