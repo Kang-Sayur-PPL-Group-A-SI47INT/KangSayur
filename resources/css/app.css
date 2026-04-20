@@ -1,6 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* ── Tailwind v4 Theme Configuration ── */
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+
+    --color-cream-50: #faf8f5;
+    --color-cream-100: #f5f1eb;
+    --color-cream-200: #ede7db;
+    --color-cream-300: #e0d5c4;
+
+    --color-forest-600: #2d5016;
+    --color-forest-700: #1a3a0a;
+    --color-forest-800: #0f2b05;
+    --color-forest-900: #0a1f03;
+
+    --color-olive-500: #4a7c2e;
+    --color-olive-600: #3d6b24;
+    --color-olive-700: #2f551b;
+}
 
 @layer base {
     html {
@@ -76,161 +94,6 @@
         @apply text-gray-500 font-medium hover:text-gray-900 transition-colors duration-200;
     }
 
-
-@theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-serif: 'Georgia', Cambria, 'Times New Roman', Times, serif;
-
-    /* Cream palette */
-    --color-cream-50: #faf8f4;
-    --color-cream-100: #f5f1eb;
-    --color-cream-200: #ede7db;
-    --color-cream-300: #e0d5c4;
-
-    /* Forest palette */
-    --color-forest-600: #2d5a27;
-    --color-forest-700: #1e4620;
-    --color-forest-800: #15371a;
-    --color-forest-900: #0d2a13;
-
-    /* Olive palette */
-    --color-olive-500: #6b7c3f;
-    --color-olive-600: #556431;
-    --color-olive-700: #3f4c24;
-}
-
-@layer components {
-    /* Split auth page left panel */
-    .auth-left-panel {
-        background: linear-gradient(135deg, #e8f0dc 0%, #f5f1eb 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 2.5rem;
-        position: relative;
-        overflow: hidden;
-        min-height: 100vh;
-    }
-
-    /* Glassmorphism testimonial card overlay */
-    .auth-testimonial-card {
-        background: rgba(255, 255, 255, 0.65);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 1.25rem;
-        padding: 1.5rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    /* Role selector cards */
-    .role-card {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.875rem 1.25rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: white;
-    }
-
-    .role-card:hover {
-        border-color: #86efac;
-        background: #f0fdf4;
-    }
-
-    .role-card.active {
-        border-color: #16a34a;
-        background: #f0fdf4;
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-    }
-
-    /* Auth input fields */
-    .auth-input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        padding-right: 2.75rem;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 0.75rem;
-        font-size: 0.9375rem;
-        background: rgba(249, 250, 251, 0.5);
-        transition: all 0.2s ease;
-        outline: none;
-    }
-
-    .auth-input:focus {
-        border-color: #16a34a;
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        background: white;
-    }
-
-    .auth-input::placeholder {
-        color: #9ca3af;
-    }
-
-    /* Auth input icon wrapper */
-    .auth-input-icon {
-        position: absolute;
-        right: 0.875rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-        pointer-events: none;
-    }
-
-    /* Primary green button */
-    .btn-primary-green {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.8125rem 1.5rem;
-        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-        color: white;
-        font-weight: 600;
-        font-size: 0.9375rem;
-        border-radius: 9999px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
-    }
-
-    .btn-primary-green:hover {
-        background: linear-gradient(135deg, #15803d 0%, #166534 100%);
-        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
-        transform: translateY(-1px);
-    }
-
-    .btn-primary-green:active {
-        transform: translateY(0);
-    }
-
-    /* Social login buttons */
-    .btn-social {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.6875rem 1.25rem;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 9999px;
-        background: white;
-        font-weight: 500;
-        font-size: 0.875rem;
-        color: #374151;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-social:hover {
-        border-color: #d1d5db;
-        background: #f9fafb;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     /* Pagination */
     .pagination-btn {
         @apply w-10 h-10 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200;
@@ -240,6 +103,5 @@
     }
     .pagination-btn-inactive {
         @apply bg-cream-100 text-gray-600 hover:bg-green-100;
-
     }
 }

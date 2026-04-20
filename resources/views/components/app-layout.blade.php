@@ -32,24 +32,24 @@
                             </a>
                             @auth
                                 <div class="hidden sm:flex sm:ml-10 sm:space-x-1">
-                                    <a href="{{ route('marketplace') }}" class="px-4 py-2 text-sm {{ request()->routeIs('marketplace') ? 'nav-link-active' : 'nav-link' }}">
+                                    <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('marketplace') ? 'nav-link-active' : 'nav-link' }}">
                                         Marketplace
                                     </a>
                                     @if(auth()->user()->isCustomer())
-                                        <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
                                             Negotiations
                                         </a>
-                                        <a href="{{ route('customer.wishlist') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.wishlist') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('customer.wishlist') ? 'nav-link-active' : 'nav-link' }}">
                                             Wishlist
                                         </a>
                                     @elseif(auth()->user()->isFarmer())
-                                        <a href="{{ route('farmer.listings.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.listings*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.listings*') ? 'nav-link-active' : 'nav-link' }}">
                                             My Produce
                                         </a>
-                                        <a href="{{ route('farmer.offers.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
                                             Offers
                                         </a>
-                                        <a href="{{ route('farmer.orders.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.orders*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.orders*') ? 'nav-link-active' : 'nav-link' }}">
                                             Orders
                                         </a>
                                     @endif
@@ -61,7 +61,7 @@
                             @auth
                                 <!-- Search in nav -->
                                 <div class="hidden md:block relative">
-                                    <form method="GET" action="{{ route('marketplace') }}">
+                                    <form method="GET" action="#">
                                         <div class="relative">
                                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search fresh harvest..."
@@ -72,7 +72,7 @@
 
                                 @if(auth()->user()->isCustomer())
                                     <!-- Cart Icon -->
-                                    <a href="{{ route('customer.cart') }}" class="relative p-2 text-gray-500 hover:text-green-700 transition-colors">
+                                    <a href="#" class="relative p-2 text-gray-500 hover:text-green-700 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
                                     </a>
                                 @endif
@@ -96,17 +96,17 @@
                                             <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
                                         </div>
                                         @if(auth()->user()->isAdmin())
-                                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Admin Dashboard</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Admin Dashboard</a>
                                         @elseif(auth()->user()->isFarmer())
-                                            <a href="{{ route('farmer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
-                                            <a href="{{ route('farmer.profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
                                         @else
                                             <a href="{{ route('customer.offers') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Offers</a>
                                             <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Orders</a>
                                             <a href="{{ route('customer.wishlist') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Wishlist</a>
                                         @endif
                                         <div class="border-t border-gray-100 mt-1 pt-1">
-                                            <form method="POST" action="{{ route('logout') }}">
+                                            <form method="POST" action="#">
                                                 @csrf
                                                 <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Log Out</button>
                                             </form>
@@ -114,7 +114,7 @@
                                     </div>
                                 </div>
                             @else
-                                <a href="#" class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-700 transition-colors">Sign In</a>
+                                <a href="{{ route('register')}}" class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-700 transition-colors">Sign In</a>
                                 <a href="#" class="px-5 py-2.5 bg-green-800 text-white text-sm font-semibold rounded-full hover:bg-green-900 transition-all duration-200">Get Started</a>
                             @endauth
                         </div>

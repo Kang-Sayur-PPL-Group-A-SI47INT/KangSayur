@@ -14,17 +14,19 @@ return new class extends Migration
         Schema::create('listings', function (Blueprint $table) {
             $table->id('listing_id');
             $table->string('title');
-            $table->text('description')->nullable();
+            $table->text('content')->nullable();
             $table->decimal('price', 12, 2);
-            $table->string('unit')->nullable()->default('kg');
-            $table->string('status')->default('active');
-            $table->string('image')->nullable();
-            $table->unsignedBigInteger('user_user_id');
+            $table->integer('quantity')->default(0);
+            $table->string('unit', 20)->default('kg');
+            $table->enum('status', ['active', 'inactive', 'sold_out'])->default('active');
+            $table->text('image')->nullable();
+            $table->date('availability_date')->nullable();
             $table->unsignedBigInteger('produce_produce_id');
+            $table->unsignedBigInteger('user_user_id');
             $table->timestamps();
 
-            $table->foreign('user_user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('produce_produce_id')->references('produce_id')->on('produces')->onDelete('cascade');
+            $table->foreign('user_user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
 
