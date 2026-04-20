@@ -2,55 +2,101 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Listing extends Model
 {
-    use HasFactory;
-
     protected $primaryKey = 'listing_id';
 
     protected $fillable = [
         'title',
-        'description',
+        'content',
         'price',
+        'quantity',
         'unit',
         'status',
         'image',
-        'user_user_id',
+        'availability_date',
         'produce_produce_id',
+        'user_user_id',
     ];
 
-    /**
-     * Get the farmer (user) who owns this listing.
-     */
-    public function farmer()
+    protected function casts(): array
     {
-        return $this->belongsTo(User::class, 'user_user_id', 'id');
+        return [
+            'availability_date' => 'date',
+        ];
     }
 
-    /**
-     * Get the produce type for this listing.
-     */
     public function produce()
     {
         return $this->belongsTo(Produce::class, 'produce_produce_id', 'produce_id');
     }
 
-    /**
-     * Get all ratings for this listing.
-     */
+    public function farmer()
+    {
+        return $this->belongsTo(User::class, 'user_user_id', 'user_id');
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class, 'listing_listing_id', 'listing_id');
+    }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class, 'listing_listing_id', 'listing_id');
+    }
+
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'listing_listing_id', 'listing_id');
     }
 
-    /**
-     * Get the average rating for this listing.
-     */
-    public function getAvgRatingAttribute()
+    public function averageRating()
     {
-        return $this->ratings->avg('score') ?? 0;
+        return $this->ratings()->avg('rating');
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if listing has active (pending/paid) orders.
+     */
+    public function hasActiveOrders(): bool
+    {
+        return $this->cartItems()
+            ->whereHas('cart.transaction', function ($q) {
+                $q->whereIn('status', ['pending', 'paid']);
+            })->exists();
+    }
+
+    /**
+     * Get stock status label.
+     */
+    public function stockStatus(): string
+    {
+        $qty = (int) $this->quantity;
+        if ($qty <= 0 || $this->status === 'sold_out') return 'Sold Out';
+        if ($qty <= 10) return 'Low Stock';
+        return 'In Stock';
+    }
+
+    /**
+     * Get images as array (supports JSON or single path).
+     */
+    public function getImagesArray(): array
+    {
+        if (!$this->image) return [];
+        $decoded = json_decode($this->image, true);
+        return is_array($decoded) ? $decoded : [$this->image];
     }
 }
