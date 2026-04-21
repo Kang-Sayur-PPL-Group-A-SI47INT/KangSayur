@@ -1,0 +1,36 @@
+<x-app-layout>
+    @php $title = 'Farmer Dashboard'; @endphp
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Welcome back, {{ auth()->user()->name }}! 🌾</h1>
+                <p class="text-gray-500 mt-1">Here's what's happening on your farm today.</p>
+            </div>
+            <a href="#" class="px-5 py-2.5 bg-green-800 text-white font-semibold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
+                + New Listing
+            </a>
+        </div>
+
+        
+
+        
+
+        
+
+        <!-- Quick Links -->
+        <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach([
+                ['route' => 'farmer.listings.index', 'icon' => '🌱', 'label' => 'Manage Produce'],
+                ['route' => 'farmer.offers.index', 'icon' => '💬', 'label' => 'My Offers'],
+                ['route' => 'farmer.orders.index', 'icon' => '📦', 'label' => 'Orders'],
+                ['route' => 'farmer.profile.edit', 'icon' => '👤', 'label' => 'Edit Profile'],
+            ] as $link)
+                <a href="#" class="bg-white border border-gray-100 rounded-2xl p-5 text-center hover:shadow-lg hover:shadow-green-50 transition-all duration-300 hover:-translate-y-1 group">
+                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">{{ $link['icon'] }}</div>
+                    <p class="font-semibold text-gray-900 text-sm">{{ $link['label'] }}</p>
+                </a>
+            @endforeach
+        </div>
+    </div>
+</x-app-layout>

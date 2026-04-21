@@ -29,7 +29,7 @@ Route::get('/marketplace', function () {
 })->name('marketplace');
 
 Route::get('/farmer/dashboard', function () {
-    return 'Farmer Dashboard — Coming Soon';
+    return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');
 
 require __DIR__.'/auth.php';
