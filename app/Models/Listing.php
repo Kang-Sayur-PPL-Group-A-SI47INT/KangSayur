@@ -60,7 +60,7 @@ class Listing extends Model
 
     public function averageRating()
     {
-        return $this->ratings()->avg('rating');
+        return $this->ratings()->avg('score');
     }
 
     public function isActive(): bool

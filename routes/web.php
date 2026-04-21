@@ -24,9 +24,7 @@ Route::get('/login', function () {
     return 'Login — Coming Soon';
 })->middleware('guest')->name('login');
 
-Route::get('/marketplace', function () {
-    return 'Marketplace — Coming Soon';
-})->name('marketplace');
+
 
 Route::get('/farmer/dashboard', function () {
     return 'Farmer Dashboard — Coming Soon';
