@@ -66,13 +66,9 @@ class MarketplaceController extends Controller
             ->distinct()
             ->pluck('city');
 
-        // Wishlist IDs for heart icons
-        $wishlistIds = [];
-        if (auth()->check()) {
-            $wishlistIds = auth()->user()->wishlists()->pluck('listing_listing_id')->toArray();
-        }
+        
 
-        return view('marketplace.index', compact('listings', 'categories', 'cities', 'wishlistIds'));
+        return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
 
     public function show(Listing $listing): View
@@ -86,17 +82,9 @@ class MarketplaceController extends Controller
             ->get();
 
         $userRating = null;
-        $isWishlisted = false;
-        if (auth()->check()) {
-            $userRating = $listing->ratings()
-                ->where('user_user_id', auth()->user()->user_id)
-                ->first();
-            $isWishlisted = $listing->wishlists()
-                ->where('user_user_id', auth()->user()->user_id)
-                ->exists();
-        }
+        
 
-        return view('marketplace.show', compact('listing', 'relatedListings', 'userRating', 'isWishlisted'));
+        return view('marketplace.show', compact('listing', 'relatedListings', 'userRating'));
     }
 
     private function sortByNearest($query)

@@ -48,7 +48,7 @@ class ListingController extends Controller
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|numeric|min:1',
             'unit' => 'required|string|max:20',
-            'produce_produce_id' => 'required|exists:produce,produce_id',
+            'produce_produce_id' => 'required|exists:produces,produce_id',
             'availability_date' => 'nullable|date',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
@@ -91,7 +91,7 @@ class ListingController extends Controller
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|numeric|min:1',
             'unit' => 'required|string|max:20',
-            'produce_produce_id' => 'required|exists:produce,produce_id',
+            'produce_produce_id' => 'required|exists:produces,produce_id',
             'status' => 'required|in:active,inactive,sold_out',
             'availability_date' => 'nullable|date',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',

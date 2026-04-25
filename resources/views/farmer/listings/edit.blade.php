@@ -21,40 +21,9 @@
                 @csrf
                 @method('PUT')
 
-                {{-- Current Images Preview --}}
-                @php $existingImages = $listing->getImagesArray(); @endphp
-                @if(count($existingImages) > 0)
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">Current Images</label>
-                        <div class="flex flex-wrap gap-3">
-                            @foreach($existingImages as $img)
-                                <div class="relative group/img">
-                                    <img src="{{ asset('storage/' . $img) }}" alt="Listing image"
-                                         class="w-24 h-24 object-cover rounded-xl border-2 border-gray-100 group-hover/img:border-green-300 transition-colors">
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
+                
 
-                {{-- New Image Upload --}}
-                <div class="mb-8">
-                    <label for="images" class="block text-sm font-semibold text-gray-700 mb-2">Upload New Images</label>
-                    <div class="relative">
-                        <input type="file" name="images[]" id="images" multiple accept="image/jpeg,image/png,image/jpg,image/webp"
-                               class="block w-full text-sm text-gray-500
-                                      file:mr-4 file:py-2.5 file:px-5
-                                      file:rounded-full file:border-0
-                                      file:text-sm file:font-semibold
-                                      file:bg-green-50 file:text-green-700
-                                      hover:file:bg-green-100 file:cursor-pointer
-                                      file:transition-colors">
-                        <p class="text-xs text-gray-400 mt-2">JPEG, PNG, JPG, or WebP. Max 2MB each.</p>
-                    </div>
-                    @error('images.*')
-                        <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+
 
                 {{-- Form Grid --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
