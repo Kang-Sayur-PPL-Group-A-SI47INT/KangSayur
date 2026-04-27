@@ -2,52 +2,47 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $primaryKey = 'user_id';
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'address',
+        'city',
+        'latitude',
+        'longitude',
+        'profile_photo',
+        'farm_description',
+        'is_public_profile',
+        'social_provider',
+        'social_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'latitude' => 'decimal:8',
+            'longitude' => 'decimal:8',
+            'is_public_profile' => 'boolean',
         ];
     }
-<<<<<<< Updated upstream
-=======
 
     // Role helpers
     public function isAdmin(): bool
@@ -111,7 +106,7 @@ class User extends Authenticatable
     {
         return Rating::whereHas('listing', function ($q) {
             $q->where('user_user_id', $this->user_id);
-        })->avg('rating');
+        })->avg('score');
     }
 
     public function calculateScore()
@@ -137,5 +132,5 @@ class User extends Authenticatable
     {
         return $this->cart ?? Cart::create(['user_user_id' => $this->user_id]);
     }
->>>>>>> Stashed changes
+
 }

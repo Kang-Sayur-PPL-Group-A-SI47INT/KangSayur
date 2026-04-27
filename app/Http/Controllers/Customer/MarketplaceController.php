@@ -46,8 +46,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'rating')
-                ->having('ratings_avg_rating', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'score')
+                ->having('ratings_avg_score', '>=', $request->min_rating);
         }
 
         // Sort
@@ -67,13 +67,9 @@ class MarketplaceController extends Controller
             ->distinct()
             ->pluck('city');
 
-        // Wishlist IDs for heart icons
-        $wishlistIds = [];
-        if (auth()->check()) {
-            $wishlistIds = auth()->user()->wishlists()->pluck('listing_listing_id')->toArray();
-        }
+        
 
-        return view('marketplace.index', compact('listings', 'categories', 'cities', 'wishlistIds'));
+        return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
 
     public function show(Listing $listing): View
@@ -92,12 +88,10 @@ class MarketplaceController extends Controller
             $userRating = $listing->ratings()
                 ->where('user_user_id', auth()->user()->user_id)
                 ->first();
-            $isWishlisted = $listing->wishlists()
-                ->where('user_user_id', auth()->user()->user_id)
-                ->exists();
+            
         }
 
-        return view('marketplace.show', compact('listing', 'relatedListings', 'userRating', 'isWishlisted'));
+        return view('marketplace.show', compact('listing', 'relatedListings', 'userRating'));
     }
 
     public function showFarmer($id): View
@@ -105,7 +99,7 @@ class MarketplaceController extends Controller
         $farmer = User::where('user_id', $id)->firstOrFail();
 
         // calculate average rating
-        $avgRating = $farmer->ratings()->avg('rating') ?? 0;
+        $avgRating = $farmer->ratings()->avg('score') ?? 0;
 
         // count total sales (based on listings sold or transactions if you have it)
         $totalSales = $farmer->listings()->count();
