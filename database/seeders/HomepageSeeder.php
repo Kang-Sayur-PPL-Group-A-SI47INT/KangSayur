@@ -58,12 +58,12 @@ class HomepageSeeder extends Seeder
 
         // Create listings
         $listingData = [
-            ['title' => 'Wortel Segar Organik', 'content' => 'Wortel segar langsung dari kebun organik Pak Budi di Lembang.', 'price' => 15000, 'unit' => 'kg', 'farmer_index' => 0, 'produce_index' => 0],
-            ['title' => 'Tomat Merah Premium', 'content' => 'Tomat merah matang sempurna, manis dan berair.', 'price' => 12000, 'unit' => 'kg', 'farmer_index' => 1, 'produce_index' => 1],
-            ['title' => 'Jagung Manis Muda', 'content' => 'Jagung manis baru dipetik pagi ini, sempurna untuk direbus.', 'price' => 8000, 'unit' => 'ikat', 'farmer_index' => 2, 'produce_index' => 2],
-            ['title' => 'Sawi Hijau Segar', 'content' => 'Sawi hijau renyah dan segar untuk sayur bening atau tumis.', 'price' => 6000, 'unit' => 'ikat', 'farmer_index' => 0, 'produce_index' => 3],
-            ['title' => 'Terong Ungu Jumbo', 'content' => 'Terong ungu ukuran besar, cocok untuk digoreng atau dibakar.', 'price' => 10000, 'unit' => 'kg', 'farmer_index' => 1, 'produce_index' => 4],
-            ['title' => 'Paprika Hijau Crunchy', 'content' => 'Paprika hijau segar dengan rasa renyah, ideal untuk salad.', 'price' => 25000, 'unit' => 'kg', 'farmer_index' => 2, 'produce_index' => 5],
+            ['title' => 'Wortel Segar Organik', 'content' => 'Wortel segar langsung dari kebun organik Pak Budi di Lembang.', 'price' => 15000, 'quantity' => 50, 'unit' => 'kg', 'farmer_index' => 0, 'produce_index' => 0],
+            ['title' => 'Tomat Merah Premium', 'content' => 'Tomat merah matang sempurna, manis dan berair.', 'price' => 12000, 'quantity' => 8, 'unit' => 'kg', 'farmer_index' => 1, 'produce_index' => 1],
+            ['title' => 'Jagung Manis Muda', 'content' => 'Jagung manis baru dipetik pagi ini, sempurna untuk direbus.', 'price' => 8000, 'quantity' => 30, 'unit' => 'ikat', 'farmer_index' => 2, 'produce_index' => 2],
+            ['title' => 'Sawi Hijau Segar', 'content' => 'Sawi hijau renyah dan segar untuk sayur bening atau tumis.', 'price' => 6000, 'quantity' => 5, 'unit' => 'ikat', 'farmer_index' => 0, 'produce_index' => 3],
+            ['title' => 'Terong Ungu Jumbo', 'content' => 'Terong ungu ukuran besar, cocok untuk digoreng atau dibakar.', 'price' => 10000, 'quantity' => 25, 'unit' => 'kg', 'farmer_index' => 1, 'produce_index' => 4],
+            ['title' => 'Paprika Hijau Crunchy', 'content' => 'Paprika hijau segar dengan rasa renyah, ideal untuk salad.', 'price' => 25000, 'quantity' => 15, 'unit' => 'kg', 'farmer_index' => 2, 'produce_index' => 5],
         ];
 
         $listings = [];
@@ -74,6 +74,7 @@ class HomepageSeeder extends Seeder
                     'title' => $data['title'],
                     'content' => $data['content'],
                     'price' => $data['price'],
+                    'quantity' => $data['quantity'],
                     'unit' => $data['unit'],
                     'status' => 'active',
                     'user_user_id' => $farmers[$data['farmer_index']]->user_id,

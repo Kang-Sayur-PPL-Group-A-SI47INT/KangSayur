@@ -3,6 +3,7 @@
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer;
+use App\Http\Controllers\Farmer;
 
 Route::get('/', function () {
     $featuredListings = collect();
@@ -19,18 +20,20 @@ Route::get('/', function () {
     return view('welcome', compact('featuredListings'));
 })->name('home');
 
-// Placeholder routes for redirect targets (to be replaced with actual controllers later)
-Route::get('/login', function () {
-    return 'Login — Coming Soon';
-})->middleware('guest')->name('login');
-
-
 
 Route::get('/farmer/dashboard', function () {
-    return 'Farmer Dashboard — Coming Soon';
+    return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');
 
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
+    // Listings
+    Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
+    Route::get('/listings/{listing}/edit', [Farmer\ListingController::class, 'edit'])->name('listings.edit');
+    Route::put('/listings/{listing}', [Farmer\ListingController::class, 'update'])->name('listings.update');
+    Route::delete('/listings/{listing}', [Farmer\ListingController::class, 'destroy'])->name('listings.destroy');
+});
 
 Route::middleware(['auth', 'role:customer'])->name('customer.')->group(function () {
     // Cart
@@ -66,4 +69,11 @@ Route::middleware(['auth', 'role:customer'])->name('customer.')->group(function 
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace', [Customer\MarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/marketplace/{listing}', [Customer\MarketplaceController::class, 'show'])->name('marketplace.show');
+});
+
+Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
+    Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
+
+    // Listings CRUD
+    Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
 });

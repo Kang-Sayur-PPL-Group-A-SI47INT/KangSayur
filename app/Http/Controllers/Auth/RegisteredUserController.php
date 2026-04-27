@@ -51,6 +51,10 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('marketplace');
+        return match ($user->role) {
+            'farmer' => redirect()->route('farmer.dashboard'),
+            'customer' => redirect()->route('marketplace'),
+            default => redirect()->route('marketplace'),
+        };
     }
 }

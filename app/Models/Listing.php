@@ -48,17 +48,12 @@ class Listing extends Model
         return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function wishlists()
-    {
-        return $this->hasMany(Wishlist::class, 'listing_listing_id', 'listing_id');
-    }
-
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function averageRating()
+    public function averageRating(): ?float
     {
         return $this->ratings()->avg('score');
     }
