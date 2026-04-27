@@ -2,6 +2,7 @@
 
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Farmer;
 
@@ -39,7 +40,11 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace', [Customer\MarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/marketplace/{listing}', [Customer\MarketplaceController::class, 'show'])->name('marketplace.show');
+
+    Route::get('/farmer/{id}', [MarketplaceController::class, 'showFarmer'])->name('farmer.show');
 });
+
+
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
@@ -47,3 +52,4 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
     // Listings CRUD
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
 });
+

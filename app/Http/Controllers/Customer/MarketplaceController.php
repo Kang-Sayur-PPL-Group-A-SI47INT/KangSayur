@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Models\Produce;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -82,11 +83,35 @@ class MarketplaceController extends Controller
             ->get();
 
         $userRating = null;
-        
+        $isWishlisted = false;
+        if (auth()->check()) {
+            $userRating = $listing->ratings()
+                ->where('user_user_id', auth()->user()->user_id)
+                ->first();
+            
+        }
 
         return view('marketplace.show', compact('listing', 'relatedListings', 'userRating'));
     }
 
+    public function showFarmer($id): View
+    {
+        $farmer = User::where('user_id', $id)->firstOrFail();
+
+        // calculate average rating
+        $avgRating = $farmer->ratings()->avg('score') ?? 0;
+
+        // count total sales (based on listings sold or transactions if you have it)
+        $totalSales = $farmer->listings()->count();
+
+        // score formula
+        $score = ($avgRating * 0.7) + ($totalSales * 0.3);
+
+        $score = round($score, 2);
+
+        return view('farmer.profile', compact('farmer', 'score'));
+    }
+    
     private function sortByNearest($query)
     {
         $user = auth()->user();
