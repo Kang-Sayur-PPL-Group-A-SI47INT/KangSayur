@@ -45,8 +45,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'rating')
-                ->having('ratings_avg_rating', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'score')
+                ->having('ratings_avg_score', '>=', $request->min_rating);
         }
 
         // Sort

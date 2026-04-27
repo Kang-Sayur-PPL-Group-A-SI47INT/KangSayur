@@ -81,7 +81,6 @@
                         </button>
                     </form>
 
-                    
 
                     <!-- Make Offer -->
                     <div class="bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-8" x-data="{ showOffer: false }">

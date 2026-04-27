@@ -106,7 +106,7 @@ class User extends Authenticatable
     {
         return Rating::whereHas('listing', function ($q) {
             $q->where('user_user_id', $this->user_id);
-        })->avg('rating');
+        })->avg('score');
     }
 
     public function totalListings()
