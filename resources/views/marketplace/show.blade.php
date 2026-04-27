@@ -45,7 +45,7 @@
 
                 <!-- Farmer Info -->
                 <div class="flex items-center gap-4 mb-6">
-                    <a href="{{ route('farmer.profile.show', $listing->farmer->user_id) }}" class="flex items-center gap-3 hover:text-green-700 transition-colors">
+                    <a href="#" class="flex items-center gap-3 hover:text-green-700 transition-colors">
                         <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold">
                             {{ strtoupper(substr($listing->farmer->name ?? '', 0, 1)) }}
                         </div>
@@ -81,14 +81,7 @@
                         </button>
                     </form>
 
-                    <div class="flex gap-3 mb-6">
-                        <form method="POST" action="{{ route('customer.wishlist.toggle', $listing) }}" class="flex-1">
-                            @csrf
-                            <button class="w-full py-3 border-2 {{ $isWishlisted ? 'border-red-300 bg-red-50 text-red-600' : 'border-gray-200 text-gray-600 hover:border-green-300' }} rounded-full font-semibold transition-all">
-                                {{ $isWishlisted ? '❤️ Saved' : '🤍 Save to Wishlist' }}
-                            </button>
-                        </form>
-                    </div>
+                    
 
                     <!-- Make Offer -->
                     <div class="bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-8" x-data="{ showOffer: false }">
@@ -114,7 +107,7 @@
                     <h3 class="font-semibold text-gray-900 mb-4">⭐ Rate This Produce</h3>
                     <form method="POST" action="{{ route('customer.rating.store', $listing) }}" class="space-y-4">
                         @csrf
-                        <div class="flex gap-2" x-data="{ rating: {{ $userRating->rating ?? 0 }} }">
+                        <div class="flex gap-2" x-data="{ rating: {{ $userRating->score ?? 0 }} }">
                             @for($i = 1; $i <= 5; $i++)
                                 <button type="button" @click="rating = {{ $i }}" class="text-3xl transition-transform hover:scale-125" :class="rating >= {{ $i }} ? 'text-amber-400' : 'text-gray-300'">★</button>
                             @endfor
@@ -134,7 +127,7 @@
                             <div class="bg-gray-50 rounded-xl p-4">
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="font-medium text-gray-900 text-sm">{{ $rating->user->name }}</span>
-                                    <div class="text-amber-400 text-sm">{{ str_repeat('★', $rating->rating) }}{{ str_repeat('☆', 5 - $rating->rating) }}</div>
+                                    <div class="text-amber-400 text-sm">{{ str_repeat('★', $rating->score) }}{{ str_repeat('☆', 5 - $rating->score) }}</div>
                                 </div>
                                 <p class="text-xs text-gray-400 mb-1">{{ $rating->created_at->diffForHumans() }}</p>
                                 @if($rating->comment)
