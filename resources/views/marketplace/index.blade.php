@@ -25,7 +25,6 @@
             <!-- Sidebar Filters (collapsible on mobile) -->
             <div class="mt-6 grid lg:grid-cols-4 gap-6" x-data="{ open: false }">
                 
-
                 <!-- Product Grid -->
                 <div class="lg:col-span-3">
                     <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
