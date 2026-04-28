@@ -13,63 +13,7 @@ class MarketplaceController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Listing::with(['farmer', 'produce', 'ratings'])
-            ->where('status', 'active');
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%")
-                  ->orWhereHas('produce', fn($p) => $p->where('name', 'like', "%{$search}%"));
-            });
-        }
-
-        // Category filter
-        if ($request->filled('category')) {
-            $query->whereHas('produce', fn($q) => $q->where('category', $request->category));
-        }
-
-        // Price range
-        if ($request->filled('min_price')) {
-            $query->whereRaw('CAST(price AS UNSIGNED) >= ?', [$request->min_price]);
-        }
-        if ($request->filled('max_price')) {
-            $query->whereRaw('CAST(price AS UNSIGNED) <= ?', [$request->max_price]);
-        }
-
-        // City filter
-        if ($request->filled('city')) {
-            $query->whereHas('farmer', fn($q) => $q->where('city', $request->city));
-        }
-
-        // Rating filter
-        if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'score')
-                ->having('ratings_avg_score', '>=', $request->min_rating);
-        }
-
-        // Sort
-        $sort = $request->get('sort', 'newest');
-        $query = match ($sort) {
-            'price_low' => $query->orderByRaw('CAST(price AS UNSIGNED) ASC'),
-            'price_high' => $query->orderByRaw('CAST(price AS UNSIGNED) DESC'),
-            'popular' => $query->withCount('ratings')->orderBy('ratings_count', 'desc'),
-            'nearest' => $this->sortByNearest($query),
-            default => $query->orderBy('created_at', 'desc'),
-        };
-
-        $listings = $query->paginate(12);
-        $categories = Produce::distinct()->pluck('category');
-        $cities = \App\Models\User::where('role', 'farmer')
-            ->whereNotNull('city')
-            ->distinct()
-            ->pluck('city');
-
-        
-
-        return view('marketplace.index', compact('listings', 'categories', 'cities'));
+        return view('marketplace.index');
     }
 
     public function show(Listing $listing): View
