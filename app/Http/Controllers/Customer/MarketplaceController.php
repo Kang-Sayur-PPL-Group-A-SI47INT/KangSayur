@@ -28,7 +28,7 @@ class MarketplaceController extends Controller
         // Category filter
         if ($request->filled('category')) {
             $query->whereHas('produce', fn($q) => $q->where('category', $request->category));
-        } 
+        }
 
         // Price range
         if ($request->filled('min_price')) {
@@ -45,8 +45,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'score')
-                ->having('ratings_avg_score', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'rating')
+                ->having('ratings_avg_rating', '>=', $request->min_rating);
         }
 
         // Sort
@@ -65,9 +65,7 @@ class MarketplaceController extends Controller
             ->whereNotNull('city')
             ->distinct()
             ->pluck('city');
-        
 
-        
 
         return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
@@ -83,7 +81,6 @@ class MarketplaceController extends Controller
             ->get();
 
         $userRating = null;
-        
 
         return view('marketplace.show', compact('listing', 'relatedListings', 'userRating'));
     }
