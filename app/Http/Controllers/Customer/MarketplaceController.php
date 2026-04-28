@@ -65,6 +65,7 @@ class MarketplaceController extends Controller
             ->whereNotNull('city')
             ->distinct()
             ->pluck('city');
+        
 
         
 
