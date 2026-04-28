@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__.'/auth.php';
+
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\MarketplaceController;
@@ -26,7 +28,9 @@ Route::get('/farmer/dashboard', function () {
     return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');
 
-require __DIR__.'/auth.php';
+// Public farmer profile
+Route::get('/farmer/profile/{userId}', [Farmer\ProfileController::class, 'show'])->name('farmer.profile.show');
+
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings
