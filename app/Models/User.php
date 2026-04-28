@@ -110,18 +110,18 @@ class User extends Authenticatable
     }
 
     public function calculateScore()
-{
-    // average rating 
-    $avgRating = $this->averageRating() ?? 0;
+    {
+        // average rating 
+        $avgRating = $this->averageRating() ?? 0;
 
-    // total sales 
-    $totalSales = $this->transactions()->count();
+        // total sales 
+        $totalSales = $this->transactions()->count();
 
-    // simple weighted formula
-    $score = ($avgRating * 0.7) + ($totalSales * 0.3);
+        // simple weighted formula
+        $score = ($avgRating * 0.7) + ($totalSales * 0.3);
 
-    return round($score, 2);
-}
+        return round($score, 2);
+    }
 
     public function totalListings()
     {
