@@ -28,7 +28,7 @@ class MarketplaceController extends Controller
         // Category filter
         if ($request->filled('category')) {
             $query->whereHas('produce', fn($q) => $q->where('category', $request->category));
-        }
+        } 
 
         // Price range
         if ($request->filled('min_price')) {
