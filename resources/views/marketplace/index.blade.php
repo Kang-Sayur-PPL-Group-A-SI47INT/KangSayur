@@ -13,7 +13,7 @@
                     <p class="text-gray-600 text-sm max-w-md">Browse fresh produce directly from local Indonesian farmers. Better prices, better quality.</p>
                 </div>
                 <div class="hidden lg:block">
-                    <img src="{{ asset('images/farmer-hero.jpg') }}" alt="Farm" class="w-full h-56 object-cover rounded-br-3xl">
+                    <img src="{{ asset('images/farmer-hero.png') }}" alt="Farm" class="w-full h-56 object-cover rounded-br-3xl">
                 </div>
             </div>
         </div>
@@ -137,7 +137,17 @@
                                         </div>
                                     </div>
                                 </a>
-                               
+                                <!-- Wishlist -->
+                                <form method="POST" action="{{ route('customer.wishlist.toggle', $listing) }}" class="absolute top-3 right-14 z-10">
+                                    @csrf
+                                    <button class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-sm">
+                                        @if(in_array($listing->listing_id, $wishlistIds ?? []))
+                                            <span class="text-red-500">❤️</span>
+                                        @else
+                                            <span class="text-gray-400">🤍</span>
+                                        @endif
+                                    </button>
+                                </form>
                             </div>
                         @empty
                             <div class="col-span-full text-center py-20">
