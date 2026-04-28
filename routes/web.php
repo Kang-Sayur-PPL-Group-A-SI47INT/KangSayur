@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Farmer;
+use App\Http\Controllers\Farmer\ListingController;
 
 Route::get('/', function () {
     $featuredListings = collect();
@@ -27,6 +28,8 @@ Route::get('/farmer/dashboard', function () {
 })->middleware('auth')->name('farmer.dashboard');
 
 require __DIR__.'/auth.php';
+
+Route::get('/average-price/{produce_id}', [ListingController::class, 'getAveragePrice']);
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings

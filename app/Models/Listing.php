@@ -63,6 +63,11 @@ class Listing extends Model
         return $this->status === 'active';
     }
 
+    public static function getAveragePrice($produce_id)
+    {
+        return self::where('produce_id', $produce_id)->avg('price');
+    }
+
     /**
      * Check if listing has active (pending/paid) orders.
      */
