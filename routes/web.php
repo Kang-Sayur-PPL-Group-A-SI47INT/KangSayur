@@ -35,6 +35,8 @@ Route::get('/farmer/profile/{userId}', [Farmer\ProfileController::class, 'show']
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
+    Route::get('/listings/create', [Farmer\ListingController::class, 'create'])->name('listings.create');
+    Route::post('/listings', [Farmer\ListingController::class, 'store'])->name('listings.store');
     Route::get('/listings/{listing}/edit', [Farmer\ListingController::class, 'edit'])->name('listings.edit');
     Route::put('/listings/{listing}', [Farmer\ListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{listing}', [Farmer\ListingController::class, 'destroy'])->name('listings.destroy');
