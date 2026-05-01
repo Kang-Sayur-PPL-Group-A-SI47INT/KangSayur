@@ -43,11 +43,6 @@ class Listing extends Model
         return $this->hasMany(CartItem::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function offers()
-    {
-        return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
-    }
-
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'listing_listing_id', 'listing_id');

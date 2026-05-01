@@ -29,16 +29,11 @@ class Cart extends Model
 
     /**
      * Calculate total price of all items in cart.
-     * Uses offer price if an accepted offer is linked, otherwise listing price.
      */
     public function totalPrice(): float
     {
         return $this->items->sum(function ($item) {
-            $price = $item->offer && $item->offer->status === 'accepted'
-                ? $item->offer->offered_price
-                : $item->listing->price;
-
-            return $item->quantity * $price;
+            return $item->quantity * $item->listing->price;
         });
     }
 }

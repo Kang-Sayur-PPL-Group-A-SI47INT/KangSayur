@@ -12,7 +12,6 @@ class CartItem extends Model
         'quantity',
         'cart_cart_id',
         'listing_listing_id',
-        'offer_offer_id',
     ];
 
     public function cart()
@@ -25,20 +24,11 @@ class CartItem extends Model
         return $this->belongsTo(Listing::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function offer()
-    {
-        return $this->belongsTo(Offer::class, 'offer_offer_id', 'offer_id');
-    }
-
     /**
-     * Get effective unit price (offer price if accepted, else listing price).
+     * Get effective unit price.
      */
     public function unitPrice(): float
     {
-        if ($this->offer && $this->offer->status === 'accepted') {
-            return $this->offer->offered_price;
-        }
-
         return $this->listing->price;
     }
 
