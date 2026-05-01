@@ -46,6 +46,8 @@ class DashboardController extends Controller
         ];
         $dailyTip = $tips[date('z') % count($tips)];
 
+        $score = $user->calculateScore();
+
         return view('farmer.dashboard', compact('stats', 'recentRatings', 'dailyTip'));
     }
 }

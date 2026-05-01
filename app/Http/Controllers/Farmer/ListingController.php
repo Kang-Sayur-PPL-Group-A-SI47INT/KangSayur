@@ -125,6 +125,15 @@ class ListingController extends Controller
         return redirect()->route('farmer.listings.index')->with('success', 'Listing deleted.');
     }
 
+    public function getAveragePrice($produce_id)
+    {
+        $avg = Listing::getAveragePrice($produce_id);
+
+        return response()->json([
+            'average_price' => round($avg, 0)
+        ]);
+    }
+
     private function authorize(Listing $listing): void
     {
         if ($listing->user_user_id !== auth()->user()->user_id) {
