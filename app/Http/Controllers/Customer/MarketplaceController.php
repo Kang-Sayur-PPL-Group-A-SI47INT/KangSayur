@@ -46,8 +46,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'score')
-                ->having('ratings_avg_score', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'rating')
+                ->having('ratings_avg_rating', '>=', $request->min_rating);
         }
 
         // Sort
@@ -67,7 +67,6 @@ class MarketplaceController extends Controller
             ->distinct()
             ->pluck('city');
 
-        
 
         return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
@@ -83,13 +82,6 @@ class MarketplaceController extends Controller
             ->get();
 
         $userRating = null;
-        $isWishlisted = false;
-        if (auth()->check()) {
-            $userRating = $listing->ratings()
-                ->where('user_user_id', auth()->user()->user_id)
-                ->first();
-            
-        }
 
         return view('marketplace.show', compact('listing', 'relatedListings', 'userRating'));
     }
