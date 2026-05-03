@@ -147,6 +147,7 @@
                                                 $isFavorited = auth()->user()->wishlists()->where('listing_listing_id', $listing->listing_id)->exists();
                                             @endphp
                                             <button type="submit"
+                                                    button dusk="add-to-favorite"
                                                     class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200"
                                                     title="{{ $isFavorited ? 'Remove from favorites' : 'Add to favorites' }}">
                                                 @if($isFavorited)
