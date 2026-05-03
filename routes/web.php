@@ -66,4 +66,3 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
     // Listings CRUD
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
 });
-

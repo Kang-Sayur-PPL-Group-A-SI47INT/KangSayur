@@ -72,11 +72,11 @@
 
                 @if(auth()->user()->isCustomer())
                     <!-- Add to Cart -->
-                    <form method="POST" action="#" class="flex gap-3 mb-4">
+                    <form method="POST" action="{{ route('customer.cart.add', $listing) }}" class="flex gap-3 mb-4">
                         @csrf
                         <input type="number" name="quantity" value="1" min="1" max="{{ $listing->quantity }}"
                             class="w-24 px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 text-center font-semibold">
-                        <button type="submit" class="flex-1 py-3 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
+                        <button type="submit" dusk="add-to-cart-btn" class="flex-1 py-3 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
                             🛒 Add to Cart
                         </button>
                     </form>
