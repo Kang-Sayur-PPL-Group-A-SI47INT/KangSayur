@@ -72,51 +72,18 @@
 
                 @if(auth()->user()->isCustomer())
                     <!-- Add to Cart -->
-                    <form method="POST" action="{{ route('customer.cart.add', $listing) }}" class="flex gap-3 mb-4">
+                    <form method="POST" action="#" class="flex gap-3 mb-4">
                         @csrf
                         <input type="number" name="quantity" value="1" min="1" max="{{ $listing->quantity }}"
                             class="w-24 px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 text-center font-semibold">
-                        <button type="submit" dusk="add-to-cart-btn" class="flex-1 py-3 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
+                        <button type="submit" class="flex-1 py-3 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
                             🛒 Add to Cart
                         </button>
                     </form>
-
-
-                    <!-- Make Offer -->
-                    <div class="bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-8" x-data="{ showOffer: false }">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="font-semibold text-gray-900">💰 Make an Offer</h3>
-                                <p class="text-sm text-gray-500">Negotiate a better price with the farmer</p>
-                            </div>
-                            <button @click="showOffer = !showOffer" class="px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-medium hover:bg-amber-200">Bargain</button>
-                        </div>
-                        <form method="POST" action="#" x-show="showOffer" x-transition class="mt-4 flex gap-3">
-                            @csrf
-                            <input type="number" name="offered_price" placeholder="Your offer (Rp)" required min="1"
-                                class="flex-1 px-4 py-3 rounded-xl border border-amber-200 focus:border-amber-400 outline-none text-sm">
-                            <button type="submit" class="px-6 py-3 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600">Send Offer</button>
-                        </form>
-                    </div>
                 @endif
 
-                <!-- Rating Section -->
-                @if(auth()->user()->isCustomer())
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
-                    <h3 class="font-semibold text-gray-900 mb-4">⭐ Rate This Produce</h3>
-                    <form method="POST" action="#" class="space-y-4">
-                        @csrf
-                        <div class="flex gap-2" x-data="{ rating: {{ $userRating->score ?? 0 }} }">
-                            @for($i = 1; $i <= 5; $i++)
-                                <button type="button" @click="rating = {{ $i }}" class="text-3xl transition-transform hover:scale-125" :class="rating >= {{ $i }} ? 'text-amber-400' : 'text-gray-300'">★</button>
-                            @endfor
-                            <input type="hidden" name="rating" x-bind:value="rating">
-                        </div>
-                        <textarea name="comment" rows="2" placeholder="Share your experience..." class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 outline-none text-sm">{{ $userRating->comment ?? '' }}</textarea>
-                        <button type="submit" class="px-6 py-2 bg-green-700 text-white rounded-full text-sm font-medium hover:bg-green-800">Submit Review</button>
-                    </form>
-                </div>
-                @endif
+
+
 
                 <!-- Reviews -->
                 <div>
