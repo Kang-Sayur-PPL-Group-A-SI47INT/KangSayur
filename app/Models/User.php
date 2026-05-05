@@ -71,20 +71,7 @@ class User extends Authenticatable
         return $this->hasOne(Cart::class, 'user_user_id', 'user_id');
     }
 
-    public function offers()
-    {
-        return $this->hasMany(Offer::class, 'user_user_id', 'user_id');
-    }
 
-    public function sentMessages()
-    {
-        return $this->hasMany(Message::class, 'sender_user_id', 'user_id');
-    }
-
-    public function receivedMessages()
-    {
-        return $this->hasMany(Message::class, 'receiver_user_id', 'user_id');
-    }
 
     public function wishlists()
     {

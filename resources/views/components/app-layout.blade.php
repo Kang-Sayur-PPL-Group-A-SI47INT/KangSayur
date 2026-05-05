@@ -39,8 +39,8 @@
                                         <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
                                             Negotiations
                                         </a>
-                                        <a href="{{ route('customer.wishlist') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.wishlist') ? 'nav-link-active' : 'nav-link' }}">
-                                            Wishlist
+                                        <a href="{{ route('customer.favorites') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.favorites') ? 'nav-link-active' : 'nav-link' }}">
+                                            Favorites
                                         </a>
                                     @elseif(auth()->user()->isFarmer())
                                         <a href="{{ route('farmer.listings.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.listings*') ? 'nav-link-active' : 'nav-link' }}">
@@ -66,14 +66,22 @@
                                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search fresh harvest..."
                                                 class="w-52 pl-9 pr-4 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-200 transition-all">
-                                        </div>
+                                        </div> 
                                     </form>
                                 </div>
 
                                 @if(auth()->user()->isCustomer())
                                     <!-- Cart Icon -->
-                                    <a href="#" class="relative p-2 text-gray-500 hover:text-green-700 transition-colors">
+                                    <a href="{{ route('customer.cart') }}" class="relative p-2 text-gray-500 hover:text-green-700 transition-colors {{ request()->routeIs('customer.cart') ? 'text-green-700' : '' }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+                                        @php
+                                            $cartItemCount = auth()->user()->cart?->items?->count() ?? 0;
+                                        @endphp
+                                        @if($cartItemCount > 0)
+                                            <span class="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                                {{ $cartItemCount > 9 ? '9+' : $cartItemCount }}
+                                            </span>
+                                        @endif
                                     </a>
                                 @endif
 
@@ -101,9 +109,9 @@
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
                                         @else
-                                            <a href="{{ route('customer.offers') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Offers</a>
-                                            <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Orders</a>
-                                            <a href="{{ route('customer.wishlist') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Wishlist</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Offers</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Orders</a>
+                                            <a href="{{ route('customer.favorites') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Favorites</a>
                                         @endif
                                         <div class="border-t border-gray-100 mt-1 pt-1">
                                             <form method="POST" action="{{ route('logout') }}">

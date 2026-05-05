@@ -123,7 +123,7 @@
                                         @if($listing->created_at->diffInDays(now()) < 3)
                                             <span class="absolute top-3 left-3 px-2.5 py-1 bg-green-600 text-white rounded-full text-xs font-semibold">New</span>
                                         @endif
-                                        <span class="absolute top-3 right-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
+                                        <span class="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
                                     </div>
                                     <div class="p-4">
                                         <h3 class="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-green-700 transition-colors line-clamp-1">{{ $listing->title }}</h3>
@@ -137,6 +137,27 @@
                                         </div>
                                     </div>
                                 </a>
+
+                                {{-- Favorite Heart Toggle --}}
+                                @auth
+                                    @if(auth()->user()->isCustomer())
+                                        <form method="POST" action="{{ route('customer.favorites.toggle', $listing->listing_id) }}" class="absolute top-3 right-3 z-10">
+                                            @csrf
+                                            @php
+                                                $isFavorited = auth()->user()->wishlists()->where('listing_listing_id', $listing->listing_id)->exists();
+                                            @endphp
+                                            <button type="submit"
+                                                    class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200"
+                                                    title="{{ $isFavorited ? 'Remove from favorites' : 'Add to favorites' }}">
+                                                @if($isFavorited)
+                                                    <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                                                @else
+                                                    <svg class="w-4 h-4 text-gray-400 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                                @endif
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endauth
                             </div>
                         </div>
 
