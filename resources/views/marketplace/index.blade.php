@@ -138,17 +138,23 @@
                                     </div>
                                 </a>
                             </div>
-                        @empty
-                            <div class="col-span-full text-center py-20">
-                                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-cream-200 flex items-center justify-center">
-                                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 mb-1">No Products Found</h3>
-                                <p class="text-gray-500 text-sm">No products found matching these criteria.</p>
+                        </div>
+
+                        
+
+                        <!-- Rating -->
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Min Rating</h4>
+                            <div class="flex gap-1">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <button type="submit" name="min_rating" value="{{ $i }}" class="text-2xl {{ request('min_rating') >= $i ? 'text-amber-400' : 'text-gray-300' }} hover:text-amber-400 transition-colors">★</button>
+                                @endfor
                             </div>
-                        @endforelse
+                        </div>
+
+                        <button type="submit" class="w-full py-2.5 bg-green-800 text-white rounded-xl text-sm font-semibold hover:bg-green-900">Apply Filters</button>
+                        <a href="{{ route('marketplace') }}" class="block text-center text-xs text-gray-400 hover:text-gray-600">Reset all</a>
                     </div>
-                    <div class="mt-8">{{ $listings->appends(request()->query())->links() }}</div>
                 </div>
             </div>
         </form>
