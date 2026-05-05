@@ -57,7 +57,7 @@
                         <form method="POST" action="{{ route('farmer.orders.destroy', $order->transaction_id) }}" onsubmit="return confirm('Are you sure you want to delete this order?')">
                             @csrf
                             @method('DELETE')
-                            <button class="px-5 py-2 border border-red-200 text-red-600 text-sm font-semibold rounded-full hover:bg-red-50 transition-all">
+                            <button dusk="delete-order-{{ $order->transaction_id }}" class="px-5 py-2 border border-red-200 text-red-600 text-sm font-semibold rounded-full hover:bg-red-50 transition-all">
                                 🗑️ Delete
                             </button>
                         </form>
