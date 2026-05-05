@@ -47,6 +47,7 @@
                               class="absolute top-3 right-3 z-10">
                             @csrf
                             <button type="submit"
+                                    dusk="add-to-favoritePage"
                                     class="w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 transition-all duration-200 hover:scale-110 group/heart"
                                     title="Remove from favorites">
                                 <svg class="w-5 h-5 text-red-500 group-hover/heart:text-red-600" fill="currentColor" viewBox="0 0 20 20">

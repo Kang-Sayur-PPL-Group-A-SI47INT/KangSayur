@@ -2,10 +2,12 @@
 
 namespace Tests\Browser;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 use App\Models\User;
+use App\Models\Produce;
+use App\Models\Listing;
 
 
 class FavoriteTest extends DuskTestCase
@@ -16,13 +18,39 @@ class FavoriteTest extends DuskTestCase
             'role'=>'customer',
         ]);
 
+        
+        $farmer = User::factory()->create([
+            'role' => 'farmer',
+        ]);
+
+        $produce = Produce::create([
+            'name' => 'Tomato',
+            'category' => 'Vegetables',
+        ]);
+
+        Listing::create([
+            'title' => 'Fresh Tomatoes',
+            'content' => 'Freshly harvested tomatoes',
+            'price' => 15000,
+            'quantity' => 100,
+            'unit' => 'kg',
+            'status' => 'active',
+            'produce_produce_id' => $produce->produce_id,
+            'user_user_id' => $farmer->user_id,
+        ]);
+
         $this->browse(function ($browser) use ($user): void {
             $browser->LoginAs($user)
                 ->visit('/')
                 ->clickLink('Favorites')
                 ->assertPathIs('/favorites')
                 ->clickLink('Explore Marketplace')
-                ->click('@add-to-favorite');
+                ->assertPathIs('/marketplace')
+                ->click('@add-to-favorite')
+                ->waitForText('Added to favorites!')
+                ->clickLink('Favorites')
+                ->click('@add-to-favoritePage')
+                ->assertSee('Removed from favorites.');
                 #success
         });
     }

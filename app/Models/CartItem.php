@@ -43,6 +43,14 @@ class CartItem extends Model
     }
 
     /**
+     * Alias for unitPrice() — used by checkout view.
+     */
+    public function effectivePrice(): float
+    {
+        return $this->unitPrice();
+    }
+
+    /**
      * Get subtotal for this cart item.
      */
     public function subtotal(): float

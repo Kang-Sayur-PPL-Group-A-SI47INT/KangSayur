@@ -208,17 +208,16 @@
                                 </div>
 
                                 {{-- Checkout Button --}}
-                                <a href="#" class="block w-full mt-4">
-                                    <button class="btn-primary-green flex items-center justify-center gap-2">
+                                <a href="{{ route('customer.checkout') }}" class="block w-full mt-4">
+                                    <button class="btn-primary-green flex items-center justify-center gap-2" dusk='proceed-to-checkout'>
                                         Proceed to Checkout
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                                     </button>
                                 </a>
 
                                 {{-- Secure Payment Note --}}
                                 <div class="flex items-center justify-center gap-1.5 text-xs text-gray-400 mt-2">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-                                    Secure checkout powered by Midtrans
+                                    Secure checkout
                                 </div>
                             </div>
                         </div>
