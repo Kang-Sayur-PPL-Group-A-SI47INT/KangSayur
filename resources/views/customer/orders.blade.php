@@ -1,111 +1,81 @@
-@php $title = 'My Orders'; @endphp
-
 <x-app-layout>
+    @php $title = 'My Orders'; @endphp
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">My Orders 📦</h1>
 
-        {{-- Breadcrumb --}}
-        <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
-            <a href="{{ route('home') }}" class="hover:text-green-700 transition-colors">Home</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span class="text-gray-900 font-medium">My Orders</span>
-        </div>
-
-        {{-- Page Header --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-extrabold text-gray-900" style="font-family: Georgia, serif;">
-                My Orders
-                <span class="text-green-700">📦</span>
-            </h1>
-            <p class="text-gray-500 text-sm mt-1">Track and manage all your orders</p>
-        </div>
-
-        @if($transactions->count() > 0)
-            <div class="space-y-4">
-                @foreach($transactions as $transaction)
-                    <a href="{{ route('customer.orders.detail', $transaction->transaction_id) }}"
-                       class="block bg-white rounded-2xl border border-gray-100 hover:shadow-lg hover:border-green-100 transition-all duration-300 group">
-                        <div class="p-5 sm:p-6">
-                            {{-- Top Row: Order ID + Status --}}
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                                <div>
-                                    <p class="text-xs text-gray-400 font-medium mb-0.5">Order ID</p>
-                                    <p class="font-mono text-sm font-bold text-gray-900">{{ $transaction->midtrans_order_id ?? '#' . $transaction->transaction_id }}</p>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $transaction->statusColor() }}">
-                                        {{ $transaction->statusLabel() }}
-                                    </span>
-                                    <span class="text-xs text-gray-400">{{ $transaction->created_at->format('d M Y, H:i') }}</span>
-                                </div>
-                            </div>
-
-                            {{-- Items Preview --}}
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="flex -space-x-2">
-                                    @foreach($transaction->items->take(4) as $item)
-                                        <div class="w-10 h-10 bg-green-50 rounded-xl border-2 border-white flex items-center justify-center text-sm overflow-hidden flex-shrink-0">
-                                            @php
-                                                $emojis = ['🥬', '🥕', '🍅', '🌽', '🥦', '🍆', '🥒', '🫑'];
-                                                $imgs = $item->listing ? $item->listing->getImagesArray() : [];
-                                            @endphp
-                                            @if(count($imgs))
-                                                <img src="{{ asset('storage/' . $imgs[0]) }}" class="w-full h-full object-cover" alt="">
-                                            @else
-                                                {{ $emojis[$loop->index % count($emojis)] }}
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                    @if($transaction->items->count() > 4)
-                                        <div class="w-10 h-10 bg-gray-100 rounded-xl border-2 border-white flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">
-                                            +{{ $transaction->items->count() - 4 }}
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm text-gray-700 truncate">
-                                        {{ $transaction->items->map(fn($i) => $i->listing->title ?? 'Product')->take(2)->join(', ') }}
-                                        @if($transaction->items->count() > 2)
-                                            <span class="text-gray-400">and {{ $transaction->items->count() - 2 }} more</span>
-                                        @endif
-                                    </p>
-                                    <p class="text-xs text-gray-400">{{ $transaction->items->count() }} {{ Str::plural('item', $transaction->items->count()) }}</p>
-                                </div>
-                            </div>
-
-                            {{-- Bottom Row: Total + Arrow --}}
-                            <div class="flex items-center justify-between pt-3 border-t border-gray-50">
-                                <div>
-                                    <span class="text-xs text-gray-400">Total</span>
-                                    <p class="text-lg font-bold text-green-700">Rp {{ number_format($transaction->grandTotal(), 0, ',', '.') }}</p>
-                                </div>
-                                <svg class="w-5 h-5 text-gray-300 group-hover:text-green-600 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                            </div>
+        <div class="space-y-4">
+            @forelse($orders as $order)
+                @php
+                    $statusColors = [
+                        'pending' => 'bg-amber-100 text-amber-700',
+                        'paid' => 'bg-blue-100 text-blue-700',
+                        'completed' => 'bg-green-100 text-green-700',
+                        'cancelled' => 'bg-red-100 text-red-700',
+                    ];
+                    $statusLabels = [
+                        'pending' => 'Awaiting Payment',
+                        'paid' => 'Processing',
+                        'completed' => 'Completed',
+                        'cancelled' => 'Cancelled',
+                    ];
+                @endphp
+                <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="font-bold text-gray-900">{{ $order->midtrans_order_id ?? '#' . $order->transaction_id }}</p>
+                            <p class="text-xs text-gray-500">{{ $order->created_at->format('M d, Y · h:i A') }}</p>
                         </div>
-                    </a>
-                @endforeach
-            </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusColors[$order->status] ?? 'bg-gray-100' }}">
+                            {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
+                        </span>
+                    </div>
 
-            {{-- Pagination --}}
-            @if($transactions->hasPages())
-                <div class="mt-8">
-                    {{ $transactions->links() }}
+                    <div class="space-y-2 mb-4">
+                        @foreach($order->cart->items ?? [] as $item)
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center overflow-hidden">
+                                        @php $imgs = ($item->listing ? $item->listing->getImagesArray() : []); @endphp
+                                        @if(count($imgs))
+                                            <img src="{{ asset('storage/' . $imgs[0]) }}" class="w-full h-full object-cover">
+                                        @else <span class="text-lg">🥬</span> @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ $item->listing->title ?? 'Item' }}</p>
+                                        <p class="text-xs text-gray-500">{{ $item->quantity }} × Rp {{ number_format($item->listing->price ?? 0, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900">Rp {{ number_format(($item->listing->price ?? 0) * $item->quantity, 0, ',', '.') }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div class="text-sm text-gray-500">
+                            @if($order->delivery_fee)
+                                Delivery: Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}
+                            @endif
+                        </div>
+                        <p class="font-bold text-gray-900">Total: <span class="text-green-700">Rp {{ number_format($order->grandTotal(), 0, ',', '.') }}</span></p>
+                    </div>
+
+                    @if($order->status === 'pending')
+                    <div class="mt-4">
+                        
+                        <h1 class="text-green-700">INI BUAT TEST</h1>
+                    </div>
+                    @endif
                 </div>
-            @endif
-        @else
-            {{-- Empty State --}}
-            <div class="flex flex-col items-center justify-center py-20">
-                <div class="w-32 h-32 bg-gradient-to-br from-cream-100 to-cream-200 rounded-full flex items-center justify-center mb-6">
-                    <span class="text-6xl">📭</span>
+            @empty
+                <div class="text-center py-20">
+                    <div class="text-6xl mb-4">📦</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">No Orders Yet</h3>
+                    <p class="text-gray-500 mb-6">Start shopping for fresh produce!</p>
+                    <a href="{{ route('marketplace') }}" class="px-8 py-3 bg-green-800 text-white rounded-full font-semibold hover:bg-green-900">Browse Marketplace</a>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2" style="font-family: Georgia, serif;">No orders yet</h2>
-                <p class="text-gray-500 text-center max-w-md mb-8">
-                    You haven't placed any orders yet. Start shopping for fresh produce from local farmers!
-                </p>
-                <a href="{{ route('marketplace') }}"
-                   class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-700 to-green-800 text-white font-bold rounded-full shadow-lg shadow-green-200/50 hover:from-green-800 hover:to-green-900 hover:shadow-green-300/50 transition-all duration-300">
-                    Start Shopping
-                </a>
-            </div>
-        @endif
+            @endforelse
+        </div>
+
+        <div class="mt-8">{{ $orders->links() }}</div>
     </div>
 </x-app-layout>

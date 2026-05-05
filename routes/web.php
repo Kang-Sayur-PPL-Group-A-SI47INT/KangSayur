@@ -47,6 +47,10 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
     Route::put('/listings/{listing}', [Farmer\ListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{listing}', [Farmer\ListingController::class, 'destroy'])->name('listings.destroy');
 
+    // Orders
+    Route::get('/orders', [Farmer\OrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [Farmer\ProfileController::class, 'edit'])->name('profile.edit');
@@ -85,4 +89,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
 });
 
-
+ 
+// customer orders
+Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+    // Orders
+    Route::get('/orders', [Customer\OrderController::class, 'index'])->name('orders');
+});
