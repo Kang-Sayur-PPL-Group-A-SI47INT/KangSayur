@@ -45,7 +45,7 @@
 
                 <!-- Farmer Info -->
                 <div class="flex items-center gap-4 mb-6">
-                    <a href="{{ route('farmer.profile.show', $listing->farmer->user_id) }}" class="flex items-center gap-3 hover:text-green-700 transition-colors">
+                    <a href="#" class="flex items-center gap-3 hover:text-green-700 transition-colors">
                         <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold">
                             {{ strtoupper(substr($listing->farmer->name ?? '', 0, 1)) }}
                         </div>
@@ -72,7 +72,7 @@
 
                 @if(auth()->user()->isCustomer())
                     <!-- Add to Cart -->
-                    <form method="POST" action="#" class="flex gap-3 mb-4">
+                    <form method="POST" action="{{ route('customer.cart.add', $listing) }}" class="flex gap-3 mb-4">
                         @csrf
                         <input type="number" name="quantity" value="1" min="1" max="{{ $listing->quantity }}"
                             class="w-24 px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 text-center font-semibold">
@@ -91,7 +91,7 @@
                             </div>
                             <button @click="showOffer = !showOffer" class="px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-medium hover:bg-amber-200">Bargain</button>
                         </div>
-                        <form method="POST" action="#" x-show="showOffer" x-transition class="mt-4 flex gap-3">
+                        <form method="POST" action="{{ route('customer.offers.store', $listing) }}" x-show="showOffer" x-transition class="mt-4 flex gap-3">
                             @csrf
                             <input type="number" name="offered_price" placeholder="Your offer (Rp)" required min="1"
                                 class="flex-1 px-4 py-3 rounded-xl border border-amber-200 focus:border-amber-400 outline-none text-sm">
@@ -104,7 +104,7 @@
                 @if(auth()->user()->isCustomer())
                 <div class="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
                     <h3 class="font-semibold text-gray-900 mb-4">⭐ Rate This Produce</h3>
-                    <form method="POST" action="#" class="space-y-4">
+                    <form method="POST" action="{{ route('customer.rating.store', $listing) }}" class="space-y-4">
                         @csrf
                         <div class="flex gap-2" x-data="{ rating: {{ $userRating->score ?? 0 }} }">
                             @for($i = 1; $i <= 5; $i++)
