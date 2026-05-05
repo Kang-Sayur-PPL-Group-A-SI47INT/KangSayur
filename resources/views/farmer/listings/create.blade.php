@@ -93,7 +93,7 @@
                 </div>
 
                 <button type="submit" class="w-full py-4 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50 text-lg">
-                    Publish Listing →
+                    Publish Listing
                 </button>
             </form>
         </div>
