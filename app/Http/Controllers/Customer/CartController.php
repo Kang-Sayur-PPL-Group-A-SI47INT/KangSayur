@@ -23,7 +23,7 @@ class CartController extends Controller
         $cart->load([
             'items.listing.farmer',
             'items.listing.produce',
-            'items.offer',
+            
         ]);
 
         // Calculate totals

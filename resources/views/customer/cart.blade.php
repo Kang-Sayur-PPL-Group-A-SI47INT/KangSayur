@@ -140,6 +140,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
+                                                        dusk="cart-remove"
                                                         class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                                     <span class="hidden sm:inline">Remove</span>
@@ -208,17 +209,16 @@
                                 </div>
 
                                 {{-- Checkout Button --}}
-                                <a href="#" class="block w-full mt-4">
-                                    <button class="btn-primary-green flex items-center justify-center gap-2">
+                                <a href="{{ route('customer.checkout') }}" class="block w-full mt-4">
+                                    <button class="btn-primary-green flex items-center justify-center gap-2" dusk='proceed-to-checkout'>
                                         Proceed to Checkout
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                                     </button>
                                 </a>
 
                                 {{-- Secure Payment Note --}}
                                 <div class="flex items-center justify-center gap-1.5 text-xs text-gray-400 mt-2">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-                                    Secure checkout powered by Midtrans
+                                    Secure checkout
                                 </div>
                             </div>
                         </div>
@@ -246,7 +246,6 @@
                 <a href="{{ route('marketplace') }}"
                    class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-700 to-green-800 text-white font-bold rounded-full shadow-lg shadow-green-200/50 hover:from-green-800 hover:to-green-900 hover:shadow-green-300/50 transition-all duration-300">
                     Start Shopping
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
             </div>
         @endif

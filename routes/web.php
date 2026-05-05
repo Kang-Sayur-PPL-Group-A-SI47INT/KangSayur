@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
@@ -61,6 +62,16 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('customer.cart.remove');
 });
 
+// Checkout & Payment routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('customer.checkout.process');
+    Route::get('/checkout/payment/{transaction}', [CheckoutController::class, 'paymentPage'])->name('customer.checkout.payment');
+    Route::post('/checkout/payment/{transaction}/simulate', [CheckoutController::class, 'simulatePayment'])->name('customer.checkout.simulate');
+    Route::get('/orders', [CheckoutController::class, 'orders'])->name('customer.orders');
+    Route::get('/orders/{transaction}', [CheckoutController::class, 'orderDetail'])->name('customer.orders.detail');
+});
+
 // Favorites routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('customer.favorites');
@@ -73,4 +84,3 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
     // Listings CRUD
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
 });
-
