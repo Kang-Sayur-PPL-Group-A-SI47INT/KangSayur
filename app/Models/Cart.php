@@ -29,12 +29,10 @@ class Cart extends Model
 
     /**
      * Calculate total price of all items in cart.
-     **/
+     */
     public function totalPrice(): float
     {
         return $this->items->sum(function ($item) {
-            
-
             return $item->quantity * $item->listing->price;
         });
     }

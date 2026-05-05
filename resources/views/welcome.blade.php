@@ -54,9 +54,11 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Direct From Farmers</h3>
                     <p class="text-gray-500 leading-relaxed">No middlemen. Produce shipped directly from the farm to your doorstep at fair prices.</p>
                 </div>
-                <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🌾</div>
+                <div class="group p-8 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-amber-100/50 transition-all duration-300 hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🌾</div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Farm Fresh Quality</h3>
                     <p class="text-gray-500 leading-relaxed">Browse verified produce with detailed listings, farmer profiles, and community reviews you can trust.</p>
+                </div>
                 <div class="group p-8 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 hover:-translate-y-1">
                     <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🔒</div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Secure Payment</h3>
