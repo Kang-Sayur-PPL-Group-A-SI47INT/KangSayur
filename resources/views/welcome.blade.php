@@ -21,7 +21,7 @@
                         </p>
                         <div class="flex flex-wrap gap-3">
                             <a href="#" class="px-8 py-4 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all duration-300 shadow-lg shadow-green-200/50">
-                                Start Shopping →
+                                Start Shopping 
                             </a>
                             <a href="#" class="px-8 py-4 bg-white text-green-800 font-semibold rounded-full border border-green-200 hover:bg-green-50 transition-all duration-300">
                                 Sell Your Harvest
@@ -55,14 +55,13 @@
                     <p class="text-gray-500 leading-relaxed">No middlemen. Produce shipped directly from the farm to your doorstep at fair prices.</p>
                 </div>
                 <div class="group p-8 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-amber-100/50 transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">💰</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Price Negotiation</h3>
-                    <p class="text-gray-500 leading-relaxed">Make offers directly to farmers. A transparent and fair negotiation system for everyone.</p>
+                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🌾</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Farm Fresh Quality</h3>
+                    <p class="text-gray-500 leading-relaxed">Browse verified produce with detailed listings, farmer profiles, and community reviews you can trust.</p>
                 </div>
                 <div class="group p-8 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 hover:-translate-y-1">
                     <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🔒</div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Secure Payment</h3>
-                    <p class="text-gray-500 leading-relaxed">Integrated with Midtrans for safe payments. Multiple payment methods available.</p>
                 </div>
             </div>
         </div>
@@ -84,7 +83,7 @@
             </div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach($featuredListings as $listing)
-                <a href="#"" class="product-card group">
+                <a href="#" class="product-card group">
                     <div class="aspect-square bg-cream-100 relative overflow-hidden">
                         @if($listing->image)
                             <img src="#" alt="{{ $listing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -126,9 +125,9 @@
                 </div>
                 <div class="relative">
                     <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4 font-serif">Ready to Get Started?</h2>
-                    <p class="text-green-200 mb-8 max-w-lg mx-auto">Join thousands of farmers and consumers already enjoying the benefits of Kang Sayur.</p>
+                    <p class="text-green-200 mb-8 max-w-lg mx-auto">Join local farmers and and enjoy the benefits of Kang Sayur.</p>
                     <a href="#" class="inline-flex px-8 py-4 bg-white text-green-800 font-bold rounded-full hover:bg-green-50 transition-all duration-300 shadow-xl">
-                        Sign Up Now — It's Free! →
+                        Sign Up Now! 
                     </a>
                 </div>
             </div>

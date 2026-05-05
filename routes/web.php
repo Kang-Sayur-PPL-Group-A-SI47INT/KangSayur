@@ -6,7 +6,11 @@ use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
+use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
+use App\Http\Controllers\Farmer\ListingController;
 
 Route::get('/', function () {
     $featuredListings = collect();
@@ -32,6 +36,8 @@ Route::get('/farmer/dashboard', function () {
 Route::get('/farmer/profile/{userId}', [Farmer\ProfileController::class, 'show'])->name('farmer.profile.show');
 
 
+Route::get('/average-price/{produce_id}', [ListingController::class, 'getAveragePrice']);
+
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
@@ -48,7 +54,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/farmer/{id}', [MarketplaceController::class, 'showFarmer'])->name('farmer.show');
 });
 
+// Shopping Cart routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('customer.cart');
+    Route::post('/cart/add/{listing}', [CartController::class, 'add'])->name('customer.cart.add');
+    Route::put('/cart/update/{cartItem}', [CartController::class, 'update'])->name('customer.cart.update');
+    Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('customer.cart.remove');
+});
 
+// Checkout & Payment routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('customer.checkout.process');
+    Route::get('/checkout/payment/{transaction}', [CheckoutController::class, 'paymentPage'])->name('customer.checkout.payment');
+    Route::post('/checkout/payment/{transaction}/simulate', [CheckoutController::class, 'simulatePayment'])->name('customer.checkout.simulate');
+    Route::get('/orders', [CheckoutController::class, 'orders'])->name('customer.orders');
+    Route::get('/orders/{transaction}', [CheckoutController::class, 'orderDetail'])->name('customer.orders.detail');
+});
+
+// Favorites routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('customer.favorites');
+    Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
+});
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
@@ -56,4 +84,3 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
     // Listings CRUD
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
 });
-

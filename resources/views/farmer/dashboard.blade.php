@@ -5,10 +5,14 @@
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Welcome back, {{ auth()->user()->name }}! 🌾</h1>
-                <p class="text-gray-500 mt-1">Here's what's happening on your farm today.</p>
+                <p class="text-gray-500 mt-1">Here's what's happening on your market today.</p>
+            </div>
+            <div class="mt-4 bg-green-100 border border-green-200 rounded-xl p-4 w-fit">
+                <p class="text-sm text-gray-600">Farmer Reputation</p>
+                <h2 class="text-lg font-bold text-green-900">⭐ {{ $score }}</h2>
             </div>
             <a href="#" class="px-5 py-2.5 bg-green-800 text-white font-semibold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
-                + New Listing
+                Add New Listing
             </a>
         </div>
 

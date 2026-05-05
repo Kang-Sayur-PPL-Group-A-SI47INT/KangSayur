@@ -46,8 +46,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'score')
-                ->having('ratings_avg_score', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'rating')
+                ->having('ratings_avg_rating', '>=', $request->min_rating);
         }
 
         // Sort
@@ -67,7 +67,6 @@ class MarketplaceController extends Controller
             ->distinct()
             ->pluck('city');
 
-        
 
         return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
@@ -82,16 +81,7 @@ class MarketplaceController extends Controller
             ->take(4)
             ->get();
 
-        $userRating = null;
-        $isWishlisted = false;
-        if (auth()->check()) {
-            $userRating = $listing->ratings()
-                ->where('user_user_id', auth()->user()->user_id)
-                ->first();
-            
-        }
-
-        return view('marketplace.show', compact('listing', 'relatedListings', 'userRating'));
+        return view('marketplace.show', compact('listing', 'relatedListings'));
     }
 
     public function showFarmer($id): View
@@ -109,7 +99,7 @@ class MarketplaceController extends Controller
 
         $score = round($score, 2);
 
-        return view('farmer.profile', compact('farmer', 'score'));
+        return view('farmer.profile.show', compact('farmer', 'score'));
     }
     
     private function sortByNearest($query)

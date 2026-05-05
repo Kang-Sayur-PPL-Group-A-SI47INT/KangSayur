@@ -43,11 +43,6 @@ class Listing extends Model
         return $this->hasMany(CartItem::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function offers()
-    {
-        return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
-    }
-
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'listing_listing_id', 'listing_id');
@@ -61,6 +56,11 @@ class Listing extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    public static function getAveragePrice($produce_id)
+    {
+        return self::where('produce_id', $produce_id)->avg('price');
     }
 
     /**
