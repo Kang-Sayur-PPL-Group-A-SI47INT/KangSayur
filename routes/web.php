@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
@@ -40,6 +41,8 @@ Route::get('/average-price/{produce_id}', [ListingController::class, 'getAverage
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
+    Route::get('/listings/create', [Farmer\ListingController::class, 'create'])->name('listings.create');
+    Route::post('/listings', [Farmer\ListingController::class, 'store'])->name('listings.store');
     Route::get('/listings/{listing}/edit', [Farmer\ListingController::class, 'edit'])->name('listings.edit');
     Route::put('/listings/{listing}', [Farmer\ListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{listing}', [Farmer\ListingController::class, 'destroy'])->name('listings.destroy');
@@ -48,6 +51,10 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
     Route::get('/orders', [Farmer\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
+    Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [Farmer\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [Farmer\ProfileController::class, 'update'])->name('profile.update');
 });
 
 
@@ -64,6 +71,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/add/{listing}', [CartController::class, 'add'])->name('customer.cart.add');
     Route::put('/cart/update/{cartItem}', [CartController::class, 'update'])->name('customer.cart.update');
     Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('customer.cart.remove');
+});
+
+// Checkout & Payment routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('customer.checkout.process');
+    Route::get('/checkout/payment/{transaction}', [CheckoutController::class, 'paymentPage'])->name('customer.checkout.payment');
+    Route::post('/checkout/payment/{transaction}/simulate', [CheckoutController::class, 'simulatePayment'])->name('customer.checkout.simulate');
+    Route::get('/orders', [CheckoutController::class, 'orders'])->name('customer.orders');
+    Route::get('/orders/{transaction}', [CheckoutController::class, 'orderDetail'])->name('customer.orders.detail');
 });
 
 // Favorites routes

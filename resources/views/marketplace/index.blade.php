@@ -40,6 +40,7 @@
             <!-- Sidebar Filters (collapsible on mobile) -->
             <div class="mt-6 grid lg:grid-cols-4 gap-6" x-data="{ open: false }">
                 <div class="lg:col-span-1">
+
                     <button type="button" @click="open = !open" class="lg:hidden w-full py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 mb-3">
                         🔽 Filters
                     </button>
@@ -98,6 +99,7 @@
                         <a href="{{ route('marketplace') }}" class="block text-center text-xs text-gray-400 hover:text-gray-600">Reset all</a>
                     </div>
                 </div>
+        </form>
 
                 <!-- Product Grid -->
                 <div class="lg:col-span-3">
@@ -147,6 +149,7 @@
                                                 $isFavorited = auth()->user()->wishlists()->where('listing_listing_id', $listing->listing_id)->exists();
                                             @endphp
                                             <button type="submit"
+                                                    dusk="add-to-favorite"
                                                     class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200"
                                                     title="{{ $isFavorited ? 'Remove from favorites' : 'Add to favorites' }}">
                                                 @if($isFavorited)
@@ -172,6 +175,6 @@
                     <div class="mt-8">{{ $listings->appends(request()->query())->links() }}</div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </x-app-layout>

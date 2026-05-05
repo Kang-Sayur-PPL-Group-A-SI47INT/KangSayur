@@ -11,8 +11,8 @@
                 <p class="text-sm text-gray-600">Farmer Reputation</p>
                 <h2 class="text-lg font-bold text-green-900">⭐ {{ $score }}</h2>
             </div>
-            <a href="#" class="px-5 py-2.5 bg-green-800 text-white font-semibold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
-                Add New Listing
+            <a href="{{ route('farmer.listings.create') }}" class="px-5 py-2.5 bg-green-800 text-white font-semibold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
+                + New Listing
             </a>
         </div>
 

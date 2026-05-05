@@ -24,12 +24,20 @@ class CartItem extends Model
         return $this->belongsTo(Listing::class, 'listing_listing_id', 'listing_id');
     }
 
-    /**
-     * Get effective unit price.
-     */
+    
+     /** Get effective unit price. **/
     public function unitPrice(): float
     {
+
         return $this->listing->price;
+    }
+
+    /**
+     * Alias for unitPrice() — used by checkout view.
+     */
+    public function effectivePrice(): float
+    {
+        return $this->unitPrice();
     }
 
     /**
