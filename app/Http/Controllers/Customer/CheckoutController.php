@@ -20,7 +20,7 @@ class CheckoutController extends Controller
     {
         $user = auth()->user();
         $cart = $user->getOrCreateCart();
-        $cart->load(['items.listing.farmer', 'items.listing.produce', 'items.offer']);
+        $cart->load(['items.listing.farmer', 'items.listing.produce']);
 
         // Redirect back if cart is empty
         if ($cart->items->isEmpty()) {
@@ -53,7 +53,7 @@ class CheckoutController extends Controller
 
         $user = auth()->user();
         $cart = $user->getOrCreateCart();
-        $cart->load(['items.listing.farmer', 'items.listing.produce', 'items.offer']);
+        $cart->load(['items.listing.farmer', 'items.listing.produce']);
 
         if ($cart->items->isEmpty()) {
             return redirect()->route('customer.cart')

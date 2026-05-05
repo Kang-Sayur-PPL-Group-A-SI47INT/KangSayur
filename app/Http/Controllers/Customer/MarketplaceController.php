@@ -99,7 +99,7 @@ class MarketplaceController extends Controller
 
         $score = round($score, 2);
 
-        return view('farmer.profile', compact('farmer', 'score'));
+        return view('farmer.profile.show', compact('farmer', 'score'));
     }
     
     private function sortByNearest($query)

@@ -104,7 +104,6 @@
                 <a href="{{ route('marketplace') }}"
                    class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-700 to-green-800 text-white font-bold rounded-full shadow-lg shadow-green-200/50 hover:from-green-800 hover:to-green-900 hover:shadow-green-300/50 transition-all duration-300">
                     Start Shopping
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
             </div>
         @endif
