@@ -110,7 +110,7 @@
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Admin Dashboard</a>
                                         @elseif(auth()->user()->isFarmer())
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
-                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
+                                            <a href="{{ route('farmer.profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
                                         @else
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Offers</a>
                                             <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Orders</a>

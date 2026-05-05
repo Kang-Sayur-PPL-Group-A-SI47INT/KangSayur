@@ -41,9 +41,16 @@ Route::get('/average-price/{produce_id}', [ListingController::class, 'getAverage
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
+    Route::get('/listings/create', [Farmer\ListingController::class, 'create'])->name('listings.create');
+    Route::post('/listings', [Farmer\ListingController::class, 'store'])->name('listings.store');
     Route::get('/listings/{listing}/edit', [Farmer\ListingController::class, 'edit'])->name('listings.edit');
     Route::put('/listings/{listing}', [Farmer\ListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{listing}', [Farmer\ListingController::class, 'destroy'])->name('listings.destroy');
+
+    Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [Farmer\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [Farmer\ProfileController::class, 'update'])->name('profile.update');
 });
 
 
@@ -78,9 +85,4 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
 });
 
-Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
-    Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
 
-    // Listings CRUD
-    Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
-});
