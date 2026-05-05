@@ -4,9 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Stub model for Transaction — will be fully implemented in PBI #9.
- */
 class Transaction extends Model
 {
     protected $primaryKey = 'transaction_id';
@@ -18,8 +15,8 @@ class Transaction extends Model
         'delivery_phone',
         'delivery_address',
         'status',
-        'midtrans_order_id',
         'snap_token',
+        'midtrans_order_id',
         'user_user_id',
         'cart_cart_id',
     ];
@@ -32,5 +29,36 @@ class Transaction extends Model
     public function cart()
     {
         return $this->belongsTo(Cart::class, 'cart_cart_id', 'cart_id');
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->status === 'paid';
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
+    }
+
+    /**
+     * Get items through cart.
+     */
+    public function items()
+    {
+        return $this->cart ? $this->cart->items : collect();
+    }
+
+    /**
+     * Get grand total (items + delivery).
+     */
+    public function grandTotal(): int
+    {
+        return (int) $this->total_price + (int) $this->delivery_fee;
     }
 }
