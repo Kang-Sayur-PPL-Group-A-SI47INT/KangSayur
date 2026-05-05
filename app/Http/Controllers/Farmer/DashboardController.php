@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Farmer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
-use App\Models\Offer;
 use App\Models\Rating;
 use App\Models\Transaction;
 use Illuminate\View\View;
@@ -45,6 +44,8 @@ class DashboardController extends Controller
             "🍅 Prune tomato suckers for larger, healthier fruits.",
         ];
         $dailyTip = $tips[date('z') % count($tips)];
+
+        $score = $user->calculateScore();
 
         return view('farmer.dashboard', compact('stats', 'recentRatings', 'dailyTip'));
     }

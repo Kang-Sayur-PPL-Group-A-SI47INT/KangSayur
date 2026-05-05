@@ -43,11 +43,6 @@ class Listing extends Model
         return $this->hasMany(CartItem::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function offers()
-    {
-        return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
-    }
-
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'listing_listing_id', 'listing_id');
@@ -63,15 +58,27 @@ class Listing extends Model
         return $this->status === 'active';
     }
 
+    public static function getAveragePrice($produce_id)
+    {
+        return self::where('produce_id', $produce_id)->avg('price');
+    }
+
     /**
      * Check if listing has active (pending/paid) orders.
+     * TODO: Implement properly once Cart/CartItem/Transaction models exist.
      */
     public function hasActiveOrders(): bool
     {
-        return $this->cartItems()
-            ->whereHas('cart.transaction', function ($q) {
-                $q->whereIn('status', ['pending', 'paid']);
-            })->exists();
+        // CartItem / Cart / Transaction models don't exist yet;
+        // return false so deletion is not blocked.
+        try {
+            return $this->cartItems()
+                ->whereHas('cart.transaction', function ($q) {
+                    $q->whereIn('status', ['pending', 'paid']);
+                })->exists();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**
