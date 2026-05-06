@@ -36,7 +36,7 @@ class OrderController extends Controller
         $order1->transaction_id = 1;
         $order1->created_at = now()->subHours(2);
         $order1->setRelation('user', $user);
-        $order1->setRelation('cart', $cart);
+        $order1->setRelation('items', collect([$item1, $item2]));
 
         $order2 = new Transaction([
             'midtrans_order_id' => 'KS-CUST-002',
@@ -47,7 +47,7 @@ class OrderController extends Controller
         $order2->transaction_id = 2;
         $order2->created_at = now()->subMinutes(15);
         $order2->setRelation('user', $user);
-        $order2->setRelation('cart', $cart);
+        $order2->setRelation('items', collect([$item1, $item2]));
 
         $orders = new \Illuminate\Pagination\LengthAwarePaginator([$order1, $order2], 2, 10, 1, [
             'path' => request()->url(),
