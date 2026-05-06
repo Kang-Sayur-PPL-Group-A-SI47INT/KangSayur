@@ -81,7 +81,7 @@ class MarketplaceController extends Controller
             ->take(4)
             ->get();
 
-        return view('marketplace.show', compact('listing', 'relatedListings',));
+        return view('marketplace.show', compact('listing', 'relatedListings'));
     }
 
     public function showFarmer($id): View
