@@ -1,16 +1,12 @@
 <?php
 
-require __DIR__.'/auth.php';
-
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
-use App\Http\Controllers\Farmer\ListingController;
 
 Route::get('/', function () {
     $featuredListings = collect();
@@ -32,26 +28,31 @@ Route::get('/farmer/dashboard', function () {
     return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');
 
-// Public farmer profile
-Route::get('/farmer/profile/{userId}', [Farmer\ProfileController::class, 'show'])->name('farmer.profile.show');
-
-
-Route::get('/average-price/{produce_id}', [ListingController::class, 'getAveragePrice']);
+require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
     // Listings
     Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
+    Route::get('/listings/create', [Farmer\ListingController::class, 'create'])->name('listings.create');
+    Route::post('/listings', [Farmer\ListingController::class, 'store'])->name('listings.store');
     Route::get('/listings/{listing}/edit', [Farmer\ListingController::class, 'edit'])->name('listings.edit');
     Route::put('/listings/{listing}', [Farmer\ListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{listing}', [Farmer\ListingController::class, 'destroy'])->name('listings.destroy');
+
+    // Orders
+    Route::get('/orders', [Farmer\OrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
+    Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [Farmer\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [Farmer\ProfileController::class, 'update'])->name('profile.update');
 });
 
 
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace', [Customer\MarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/marketplace/{listing}', [Customer\MarketplaceController::class, 'show'])->name('marketplace.show');
-
-    Route::get('/farmer/{id}', [MarketplaceController::class, 'showFarmer'])->name('farmer.show');
 });
 
 // Shopping Cart routes
@@ -78,9 +79,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
 });
 
-Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
-    Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
-
-    // Listings CRUD
-    Route::get('/listings', [Farmer\ListingController::class, 'index'])->name('listings.index');
+ 
+// customer orders
+Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+    // Orders
+    Route::get('/orders', [Customer\OrderController::class, 'index'])->name('orders');
 });

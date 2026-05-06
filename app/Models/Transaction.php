@@ -15,8 +15,8 @@ class Transaction extends Model
         'delivery_phone',
         'delivery_address',
         'status',
-        'midtrans_order_id',
         'snap_token',
+        'midtrans_order_id',
         'payment_type',
         'paid_at',
         'user_user_id',
@@ -42,11 +42,32 @@ class Transaction extends Model
         return $this->belongsTo(Cart::class, 'cart_cart_id', 'cart_id');
     }
 
-    public function items()
+    public function isPending(): bool
     {
-        return $this->hasMany(TransactionItem::class, 'transaction_transaction_id', 'transaction_id');
+        return $this->status === 'pending';
     }
 
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
+    }
+
+    /**
+     * Get items through cart.
+     */
+    public function items()
+    {
+        return $this->cart ? $this->cart->items : collect();
+    }
+
+    /**
+     * Get grand total (items + delivery).
+     */
+    public function grandTotal(): int
+    {
+        return (int) $this->total_price + (int) $this->delivery_fee;
+
+    }
     /**
      * Check if the transaction is paid.
      */
@@ -87,11 +108,5 @@ class Transaction extends Model
         };
     }
 
-    /**
-     * Get the grand total (total_price + delivery_fee).
-     */
-    public function grandTotal(): float
-    {
-        return $this->total_price + $this->delivery_fee;
-    }
+    
 }
