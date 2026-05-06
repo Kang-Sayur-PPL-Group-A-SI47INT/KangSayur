@@ -85,6 +85,24 @@ class MarketplaceController extends Controller
         return view('marketplace.show', compact('listing', 'relatedListings'));
     }
 
+    public function showFarmer($id): View
+    {
+        $farmer = User::where('user_id', $id)->firstOrFail();
+
+        // calculate average rating
+        $avgRating = $farmer->ratings()->avg('score') ?? 0;
+
+        // count total sales (based on listings sold or transactions if you have it)
+        $totalSales = $farmer->listings()->count();
+
+        // score formula
+        $score = ($avgRating * 0.7) + ($totalSales * 0.3);
+
+        $score = round($score, 2);
+
+        return view('farmer.profile.show', compact('farmer', 'score'));
+    }
+    
     private function sortByNearest($query)
     {
         $user = auth()->user();

@@ -1,21 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Farmer;
+namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class OrderController extends Controller
 {
     public function index(): View
     {
-        // === MOCK DATA (TABEL TRANSACTIONS BELUM ADA) ===
+        // === MOCK DATA (KARENA TABEL TRANSACTIONS BELUM ADA) ===
         // JANGAN DIUBAH KEMBALI KE QUERY DATABASE SAMPAI TABEL DIBUAT
         
-        $user = new \App\Models\User(['name' => 'Budi Santoso']);
+        $user = auth()->user() ?? new \App\Models\User(['name' => 'John Customer']);
 
         $listing1 = new \App\Models\Listing(['title' => 'Sayur Bayam Segar', 'price' => 10000]);
         $listing2 = new \App\Models\Listing(['title' => 'Wortel Manis', 'price' => 15000]);
@@ -30,7 +28,7 @@ class OrderController extends Controller
         $cart->setRelation('items', collect([$item1, $item2]));
 
         $order1 = new Transaction([
-            'midtrans_order_id' => 'KS-20260505-001',
+            'midtrans_order_id' => 'KS-CUST-001',
             'status' => 'paid',
             'total_price' => 35000,
             'delivery_fee' => 10000,
@@ -41,7 +39,7 @@ class OrderController extends Controller
         $order1->setRelation('cart', $cart);
 
         $order2 = new Transaction([
-            'midtrans_order_id' => 'KS-20260505-002',
+            'midtrans_order_id' => 'KS-CUST-002',
             'status' => 'pending',
             'total_price' => 35000,
             'delivery_fee' => 10000,
@@ -56,20 +54,6 @@ class OrderController extends Controller
             'query' => request()->query(),
         ]);
 
-        return view('farmer.orders.index', compact('orders'));
-    }
-
-    public function updateStatus(Request $request, $id): RedirectResponse
-    {
-        $request->validate(['status' => 'required|in:paid,completed']);
-        
-        // MOCK UPDATE for UI testing
-        return back()->with('success', 'Order status updated to ' . $request->status . ' (Mock)!');
-    }
-
-    public function destroy($id): RedirectResponse
-    {
-        // MOCK DELETE for UI testing
-        return back()->with('success', 'Order #' . $id . ' has been deleted successfully!');
+        return view('customer.orders', compact('orders'));
     }
 }

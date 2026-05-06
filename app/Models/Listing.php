@@ -43,14 +43,24 @@ class Listing extends Model
         return $this->hasMany(CartItem::class, 'listing_listing_id', 'listing_id');
     }
 
+    public function offers()
+    {
+        return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class, 'listing_listing_id', 'listing_id');
+    }
+
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'listing_listing_id', 'listing_id');
     }
 
-    public function averageRating(): ?float
+    public function averageRating()
     {
-        return $this->ratings()->avg('score');
+        return $this->ratings()->avg('rating');
     }
 
     public function isActive(): bool
