@@ -23,8 +23,10 @@
             <div class="flex flex-wrap gap-3">
                 <div class="flex-1 min-w-[250px] relative">
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search produce or farm names..."
+                    <input type="text" id="name" name="search" value="{{ request('search') }}" placeholder="Search produce or farm names..." dusk="search-input"
+
                         class="w-full pl-12 pr-4 py-3 rounded-full bg-white border border-gray-200 text-sm focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100">
+                        
                 </div>
                 <select name="sort" onchange="document.getElementById('filterForm').submit()"
                     class="px-5 py-3 rounded-full bg-white border border-gray-200 text-sm text-gray-600 focus:outline-none focus:border-green-400 cursor-pointer">
@@ -89,7 +91,7 @@
                             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Min Rating</h4>
                             <div class="flex gap-1">
                                 @for($i = 1; $i <= 5; $i++)
-                                    <button type="submit" name="min_rating" value="{{ $i }}" class="text-2xl {{ request('min_rating') >= $i ? 'text-amber-400' : 'text-gray-300' }} hover:text-amber-400 transition-colors">★</button>
+                                    <button type="submit" dusk="rating-star-{{ $i }}" name="min_rating" value="{{ $i }}" class="text-2xl {{ request('min_rating') >= $i ? 'text-amber-400' : 'text-gray-300' }} hover:text-amber-400 transition-colors">★</button>
                                 @endfor
                             </div>
                         </div>
@@ -105,7 +107,7 @@
                         @forelse($listings as $listing)
                             @php $images = $listing->getImagesArray(); @endphp
                             <div class="product-card group relative">
-                                <a href="{{ route('marketplace.show', $listing) }}">
+                                <a href="{{ route('marketplace.show', $listing) }}" dusk="product-card">
                                     <div class="aspect-square bg-cream-100 relative overflow-hidden">
                                         @if(count($images))
                                             <img src="{{ asset('storage/' . $images[0]) }}" alt="{{ $listing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -123,7 +125,7 @@
                                         @if($listing->created_at->diffInDays(now()) < 3)
                                             <span class="absolute top-3 left-3 px-2.5 py-1 bg-green-600 text-white rounded-full text-xs font-semibold">New</span>
                                         @endif
-                                        <span class="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
+                                        <span class="absolute top-3 right-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
                                     </div>
                                     <div class="p-4">
                                         <h3 class="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-green-700 transition-colors line-clamp-1">{{ $listing->title }}</h3>
@@ -137,45 +139,16 @@
                                         </div>
                                     </div>
                                 </a>
-
-                                {{-- Favorite Heart Toggle --}}
-                                @auth
-                                    @if(auth()->user()->isCustomer())
-                                        <form method="POST" action="{{ route('customer.favorites.toggle', $listing->listing_id) }}" class="absolute top-3 right-3 z-10">
-                                            @csrf
-                                            @php
-                                                $isFavorited = auth()->user()->wishlists()->where('listing_listing_id', $listing->listing_id)->exists();
-                                            @endphp
-                                            <button type="submit"
-                                                    class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200"
-                                                    title="{{ $isFavorited ? 'Remove from favorites' : 'Add to favorites' }}">
-                                                @if($isFavorited)
-                                                    <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
-                                                @else
-                                                    <svg class="w-4 h-4 text-gray-400 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                                                @endif
-                                            </button>
-                                        </form>
-                                    @endif
-                                @endauth
                             </div>
-                        </div>
-
-                        
-
-                        <!-- Rating -->
-                        <div>
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Min Rating</h4>
-                            <div class="flex gap-1">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <button type="submit" name="min_rating" value="{{ $i }}" class="text-2xl {{ request('min_rating') >= $i ? 'text-amber-400' : 'text-gray-300' }} hover:text-amber-400 transition-colors">★</button>
-                                @endfor
+                        @empty
+                            <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                                <span class="text-6xl mb-4">🔍</span>
+                                <h3 class="text-lg font-bold text-gray-700 mb-1">No produce found</h3>
+                                <p class="text-sm text-gray-400">Try adjusting your filters or search terms.</p>
                             </div>
-                        </div>
-
-                        <button type="submit" class="w-full py-2.5 bg-green-800 text-white rounded-xl text-sm font-semibold hover:bg-green-900">Apply Filters</button>
-                        <a href="{{ route('marketplace') }}" class="block text-center text-xs text-gray-400 hover:text-gray-600">Reset all</a>
+                        @endforelse
                     </div>
+                    <div class="mt-8">{{ $listings->appends(request()->query())->links() }}</div>
                 </div>
             </div>
         </form>
