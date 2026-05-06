@@ -45,7 +45,7 @@
 
                 <!-- Farmer Info -->
                 <div class="flex items-center gap-4 mb-6">
-                    <a href="{{ route('farmer.profile.show', $listing->farmer->user_id) }}" class="flex items-center gap-3 hover:text-green-700 transition-colors">
+                    <a href="#" class="flex items-center gap-3 hover:text-green-700 transition-colors">
                         <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold">
                             {{ strtoupper(substr($listing->farmer->name ?? '', 0, 1)) }}
                         </div>
