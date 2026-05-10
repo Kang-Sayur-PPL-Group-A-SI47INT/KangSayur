@@ -9,7 +9,7 @@
                 <h1 class="text-2xl font-bold text-gray-900">My Produce 🌱</h1>
                 <p class="text-gray-500 mt-1">Manage your listings and track inventory</p>
             </div>
-            <a href="#"
+            <a href="{{ route('farmer.listings.create') }}"
                class="inline-flex items-center gap-2 px-6 py-2.5 bg-green-800 text-white font-semibold rounded-full hover:bg-green-900 transition-all duration-200 shadow-lg shadow-green-200/50">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -181,7 +181,7 @@
                 <div class="text-6xl mb-4">🌾</div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">No listings found</h3>
                 <p class="text-gray-500 mb-6">Start adding your fresh produce to reach customers!</p>
-                <a href="#"
+                <a href="{{ route('farmer.listings.create') }}"
                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-green-800 text-white font-semibold rounded-full hover:bg-green-900 transition-all shadow-lg shadow-green-200/50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>

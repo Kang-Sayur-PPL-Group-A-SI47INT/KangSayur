@@ -2,7 +2,7 @@
     @php $title = 'My Orders'; @endphp
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 class="text-2xl font-bold text-gray-900 mb-6">My Orders 📦</h1>
-
+        
         <div class="space-y-4">
             @forelse($orders as $order)
                 @php
@@ -31,7 +31,7 @@
                     </div>
 
                     <div class="space-y-2 mb-4">
-                        @foreach($order->cart->items ?? [] as $item)
+                        @foreach($order->items as $item)
                             <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center overflow-hidden">
@@ -42,10 +42,10 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">{{ $item->listing->title ?? 'Item' }}</p>
-                                        <p class="text-xs text-gray-500">{{ $item->quantity }} × Rp {{ number_format($item->listing->price ?? 0, 0, ',', '.') }}</p>
+                                        <p class="text-xs text-gray-500">{{ $item->quantity }} × Rp {{ number_format($item->unit_price ?? $item->listing->price ?? 0, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
-                                <p class="text-sm font-semibold text-gray-900">Rp {{ number_format(($item->listing->price ?? 0) * $item->quantity, 0, ',', '.') }}</p>
+                                <p class="text-sm font-semibold text-gray-900">Rp {{ number_format($item->subtotal ?? ($item->unit_price ?? $item->listing->price ?? 0) * $item->quantity, 0, ',', '.') }}</p>
                             </div>
                         @endforeach
                     </div>

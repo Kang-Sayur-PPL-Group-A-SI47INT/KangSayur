@@ -48,6 +48,6 @@ class DashboardController extends Controller
 
         $score = $user->calculateScore();
 
-        return view('farmer.dashboard', compact('stats', 'recentRatings', 'dailyTip'));
+        return view('farmer.dashboard', compact('stats', 'recentRatings', 'dailyTip', 'score'));
     }
 }
