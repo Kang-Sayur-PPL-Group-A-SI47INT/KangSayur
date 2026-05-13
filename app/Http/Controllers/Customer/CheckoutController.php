@@ -164,12 +164,12 @@ class CheckoutController extends Controller
      */
     public function orders()
     {
-        $transactions = Transaction::where('user_user_id', auth()->id())
+        $orders = Transaction::where('user_user_id', auth()->id())
             ->with(['items.listing.produce'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('customer.orders', compact('transactions'));
+        return view('customer.orders', compact('orders'));
     }
 
     /**

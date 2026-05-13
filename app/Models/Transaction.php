@@ -53,11 +53,11 @@ class Transaction extends Model
     }
 
     /**
-     * Get items through cart.
+     * Get transaction items.
      */
     public function items()
     {
-        return $this->cart ? $this->cart->items : collect();
+        return $this->hasMany(TransactionItem::class, 'transaction_transaction_id', 'transaction_id');
     }
 
     /**
