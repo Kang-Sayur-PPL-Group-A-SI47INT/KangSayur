@@ -18,7 +18,8 @@ class UpdateProductInformationTest extends DuskTestCase
     {
 
         $farmer = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $product = Produce::create([
@@ -65,7 +66,8 @@ class UpdateProductInformationTest extends DuskTestCase
     {
 
         $farmer = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $product = Produce::create([

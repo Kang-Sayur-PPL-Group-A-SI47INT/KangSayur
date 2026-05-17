@@ -19,6 +19,7 @@ class ReadFarmerProfileTest extends DuskTestCase
         // Create farmer with public profile
         $farmer = User::factory()->create([
             'role' => 'farmer',
+            'verification_status' => 'verified',
             'name' => 'Pak Tani Dusk',
             'city' => 'Bandung',
             'farm_description' => 'Kebun organik dataran tinggi.',
@@ -65,7 +66,7 @@ class ReadFarmerProfileTest extends DuskTestCase
                 ->assertSee('Bandung')
                 ->assertSee('Kebun organik dataran tinggi.')
                 ->assertSee('Wortel Dusk Test')
-                ;
+            ;
         });
     }
 
@@ -74,6 +75,7 @@ class ReadFarmerProfileTest extends DuskTestCase
         // Create farmer with private profile
         $farmer = User::factory()->create([
             'role' => 'farmer',
+            'verification_status' => 'verified',
             'name' => 'Pak Private',
             'city' => 'Jakarta',
             'is_public_profile' => false,
@@ -89,7 +91,7 @@ class ReadFarmerProfileTest extends DuskTestCase
                 ->visit('/farmer/profile/' . $farmer->user_id)
                 ->pause(1000)
                 ->assertSee('404')
-                ;
+            ;
         });
     }
 }

@@ -14,10 +14,11 @@ class CreateFarmerProfileTest extends DuskTestCase
      */
     public function test_update_farmer_profile_success(): void
     {
-       $user = User::factory()->create([
-            'role' => 'farmer'
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
-        
+
         $this->browse(function ($browser) use ($user): void {
             $browser->loginAs($user)
                 ->visit('/farmer/dashboard')
@@ -38,16 +39,17 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->press('Simpan Perubahan')
                 ->assertPathIs('/farmer/profile')
                 ->assertSee('Profil berhasil diperbarui.')
-                ;
+            ;
         });
     }
 
     public function test_update_farmer_profile_failed(): void
     {
-       $user = User::factory()->create([
-            'role' => 'farmer'
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
-        
+
         $this->browse(function ($browser) use ($user): void {
             $browser->loginAs($user)
                 ->visit('/farmer/dashboard')
@@ -68,7 +70,7 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->press('Simpan Perubahan')
                 ->assertPathIs('/farmer/profile')
                 ->assertDontSee('Profil berhasil diperbarui.')
-                ;
+            ;
         });
     }
 }
