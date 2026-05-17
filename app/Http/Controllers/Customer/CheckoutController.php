@@ -26,11 +26,18 @@ class CheckoutController extends Controller
         $subtotal = $cart->totalPrice();
         $deliveryFee = DeliveryFeeService::calculateForCart($cart, $user);
         $grandTotal = $subtotal + $deliveryFee;
+
+        // Pass user coordinates for map initialization
+        $userLatitude = $user->latitude;
+        $userLongitude = $user->longitude;
+
         return view('marketplace.checkout', compact(
             'cart',
             'subtotal',
             'deliveryFee',
-            'grandTotal'
+            'grandTotal',
+            'userLatitude',
+            'userLongitude'
         ));
     }
     /**
@@ -42,6 +49,8 @@ class CheckoutController extends Controller
             'delivery_name' => 'required|string|max:100',
             'delivery_phone' => 'required|string|max:20',
             'delivery_address' => 'required|string|max:500',
+            'delivery_latitude' => 'nullable|numeric|between:-90,90',
+            'delivery_longitude' => 'nullable|numeric|between:-180,180',
         ]);
         $user = auth()->user();
         $cart = $user->getOrCreateCart();
@@ -50,6 +59,18 @@ class CheckoutController extends Controller
             return redirect()->route('customer.cart')
                 ->with('error', 'Your cart is empty.');
         }
+
+        // Update user coordinates if provided from map pin
+        $deliveryLat = $request->delivery_latitude;
+        $deliveryLng = $request->delivery_longitude;
+        if ($deliveryLat && $deliveryLng) {
+            $user->update([
+                'latitude' => $deliveryLat,
+                'longitude' => $deliveryLng,
+            ]);
+            $user->refresh();
+        }
+
         $subtotal = $cart->totalPrice();
         $deliveryFee = DeliveryFeeService::calculateForCart($cart, $user);
         // Generate unique order ID
@@ -65,6 +86,8 @@ class CheckoutController extends Controller
                     'delivery_name' => $request->delivery_name,
                     'delivery_phone' => $request->delivery_phone,
                     'delivery_address' => $request->delivery_address,
+                    'delivery_latitude' => $deliveryLat,
+                    'delivery_longitude' => $deliveryLng,
                     'status' => 'pending',
                     'midtrans_order_id' => $orderId,
                     'user_user_id' => $user->user_id,
