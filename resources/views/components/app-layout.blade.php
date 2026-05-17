@@ -36,7 +36,7 @@
                                         Marketplace
                                     </a>
                                     @if(auth()->user()->isCustomer())
-                                        <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
                                             Negotiations
                                         </a>
                                         <a href="{{ route('customer.favorites') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.favorites') ? 'nav-link-active' : 'nav-link' }}">
@@ -107,7 +107,7 @@
                                             <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
                                         </div>
                                         @if(auth()->user()->isAdmin())
-                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Admin Dashboard</a>
+                                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Admin Dashboard</a>
                                         @elseif(auth()->user()->isFarmer())
                                             <a href="{{ route('farmer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
                                             <a href="{{ route('farmer.profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
