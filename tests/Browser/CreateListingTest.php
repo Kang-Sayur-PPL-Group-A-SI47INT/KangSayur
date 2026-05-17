@@ -16,7 +16,8 @@ class CreateListingTest extends DuskTestCase
     public function test_create_listing_success(): void
     {
         $user = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $produce = Produce::create([
@@ -35,13 +36,13 @@ class CreateListingTest extends DuskTestCase
                 ->type('price', '12000')
                 ->type('quantity', '25')
                 ->select('unit', 'kg')
-                ->type('availability_date', '05202026') 
+                ->type('availability_date', '05202026')
                 ->type('content', 'Grown using organic fertilizers in Lembang. Harvested daily.')
                 ->press('Publish Listing')
                 ->pause(1000)
                 ->assertPathIs('/farmer/listings')
                 ->assertSee('Fresh Highland Spinach')
-                ;
+            ;
 
         });
     }
@@ -49,7 +50,8 @@ class CreateListingTest extends DuskTestCase
     public function test_create_listing_failed(): void
     {
         $user = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $produce = Produce::create([
@@ -66,12 +68,12 @@ class CreateListingTest extends DuskTestCase
                 ->type('price', '12000')
                 ->type('quantity', '25')
                 ->select('unit', 'kg')
-                ->type('availability_date', '05202026') 
+                ->type('availability_date', '05202026')
                 ->type('content', 'Grown using organic fertilizers in Lembang. Harvested daily.')
                 ->press('Publish Listing')
                 ->pause(1000)
                 ->assertPathIs('/farmer/listings/create')
-                ;
+            ;
 
         });
     }

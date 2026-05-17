@@ -12,7 +12,10 @@ class ReadOrderTest extends DuskTestCase
 {
     public function testreadorder(): void
     {
-        $farmer = User::where('role', 'farmer')->first() ?? User::factory()->create(['role' => 'farmer']);
+        $farmer = User::where('role', 'farmer')->first() ?? User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
+        ]);
 
         $this->browse(function (Browser $browser) use ($farmer) {
             $browser->loginAs($farmer)

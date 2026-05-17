@@ -14,7 +14,8 @@ class UpdateProductPictureTest extends DuskTestCase
     public function test_update_product_picture(): void
     {
         $farmer = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $product = Produce::create([
@@ -55,7 +56,8 @@ class UpdateProductPictureTest extends DuskTestCase
     public function test_update_product_picture_fail(): void
     {
         $farmer = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $product = Produce::create([
