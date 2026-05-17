@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="description" content="Kang Sayur - Bringing the richness of Indonesian soil directly to your kitchen table. Supporting over 400 local farming families.">
 
-        <title>{{ $title ?? 'Kang Sayur' }} — Kang Sayur</title>
+        <title>{{ $title ?? 'Kang Sayur' }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

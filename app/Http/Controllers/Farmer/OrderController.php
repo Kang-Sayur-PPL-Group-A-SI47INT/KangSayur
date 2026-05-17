@@ -1,75 +1,65 @@
 <?php
-
 namespace App\Http\Controllers\Farmer;
-
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Models\TransactionItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-
 class OrderController extends Controller
 {
     public function index(): View
     {
-        // === MOCK DATA (TABEL TRANSACTIONS BELUM ADA) ===
-        // JANGAN DIUBAH KEMBALI KE QUERY DATABASE SAMPAI TABEL DIBUAT
         
-        $user = new \App\Models\User(['name' => 'Budi Santoso']);
-
-        $listing1 = new \App\Models\Listing(['title' => 'Sayur Bayam Segar', 'price' => 10000]);
-        $listing2 = new \App\Models\Listing(['title' => 'Wortel Manis', 'price' => 15000]);
-
-        $item1 = new \App\Models\CartItem(['quantity' => 2]);
-        $item1->setRelation('listing', $listing1);
+        $user = auth()->user();
+        $listingIds = $user->listings()->pluck('listing_id');
+       
+        // Get transactions that contain items from this farmer's listings
+        $transactionIds = TransactionItem::whereIn('listing_listing_id', $listingIds)
+            ->pluck('transaction_transaction_id')
+            ->unique();
+      
+        $orders = Transaction::with(['user', 'items.listing.produce'])
+            ->whereIn('transaction_id', $transactionIds)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         
-        $item2 = new \App\Models\CartItem(['quantity' => 1]);
-        $item2->setRelation('listing', $listing2);
-
-        $cart = new \App\Models\Cart();
-        $cart->setRelation('items', collect([$item1, $item2]));
-
-        $order1 = new Transaction([
-            'midtrans_order_id' => 'KS-20260505-001',
-            'status' => 'paid',
-            'total_price' => 35000,
-            'delivery_fee' => 10000,
-        ]);
-        $order1->transaction_id = 1;
-        $order1->created_at = now()->subHours(2);
-        $order1->setRelation('user', $user);
-        $order1->setRelation('cart', $cart);
-
-        $order2 = new Transaction([
-            'midtrans_order_id' => 'KS-20260505-002',
-            'status' => 'pending',
-            'total_price' => 35000,
-            'delivery_fee' => 10000,
-        ]);
-        $order2->transaction_id = 2;
-        $order2->created_at = now()->subMinutes(15);
-        $order2->setRelation('user', $user);
-        $order2->setRelation('cart', $cart);
-
-        $orders = new \Illuminate\Pagination\LengthAwarePaginator([$order1, $order2], 2, 10, 1, [
-            'path' => request()->url(),
-            'query' => request()->query(),
-        ]);
-
         return view('farmer.orders.index', compact('orders'));
     }
-
     public function updateStatus(Request $request, $id): RedirectResponse
     {
         $request->validate(['status' => 'required|in:paid,completed']);
         
         // MOCK UPDATE for UI testing
-        return back()->with('success', 'Order status updated to ' . $request->status . ' (Mock)!');
+       
+        $transaction = Transaction::findOrFail($id);
+        // Verify this transaction includes items from the farmer's listings
+        $user = auth()->user();
+        $listingIds = $user->listings()->pluck('listing_id');
+        $hasItems = $transaction->items()->whereIn('listing_listing_id', $listingIds)->exists();
+        if (!$hasItems) {
+            abort(403);
+        }
+        $transaction->update(['status' => $request->status]);
+        return back()->with('success', 'Status pesanan berhasil diperbarui ke ' . $request->status . '!');
     }
-
     public function destroy($id): RedirectResponse
     {
         // MOCK DELETE for UI testing
-        return back()->with('success', 'Order #' . $id . ' has been deleted successfully!');
+      
+        $transaction = Transaction::findOrFail($id);
+        // Verify ownership
+        $user = auth()->user();
+        $listingIds = $user->listings()->pluck('listing_id');
+        $hasItems = $transaction->items()->whereIn('listing_listing_id', $listingIds)->exists();
+        if (!$hasItems) {
+            abort(403);
+        }
+        // Only allow deleting cancelled orders
+        if (!in_array($transaction->status, ['cancelled', 'delivered'])) {
+            return back()->with('error', 'Hanya pesanan yang dibatalkan atau selesai yang dapat dihapus.');
+        }
+        $transaction->delete();
+        return back()->with('success', 'Pesanan #' . $id . ' berhasil dihapus!');
     }
 }

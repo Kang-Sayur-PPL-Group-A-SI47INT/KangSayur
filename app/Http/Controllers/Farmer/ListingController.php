@@ -58,7 +58,8 @@ class ListingController extends Controller
 
         $data = $request->only(['title', 'content', 'price', 'quantity', 'unit', 'produce_produce_id', 'availability_date']);
         $data['user_user_id'] = auth()->user()->user_id;
-        $data['status'] = 'active';
+        // Status based on quantity: zero stock → inactive
+        $data['status'] = ((int) $data['quantity'] <= 0) ? 'inactive' : 'active';
 
         // Handle multiple images
         if ($request->hasFile('images')) {
@@ -89,13 +90,18 @@ class ListingController extends Controller
             'title' => 'required|string|max:100',
             'content' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:0',
             'unit' => 'required|string|max:20',
             'produce_produce_id' => 'required|exists:produces,produce_id',
             'status' => 'required|in:active,inactive,sold_out',
             'availability_date' => 'nullable|date',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        // Enforce: cannot set active if quantity is 0
+        if ((int) $request->quantity <= 0 && $request->status === 'active') {
+            return back()->withInput()->with('error', 'Tidak dapat mengaktifkan listing dengan stok 0. Tambahkan stok terlebih dahulu.');
+        }
 
         $data = $request->only(['title', 'content', 'price', 'quantity', 'unit', 'produce_produce_id', 'status', 'availability_date']);
 
