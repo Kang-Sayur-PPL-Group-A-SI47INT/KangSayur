@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Farmer;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+
 use App\Models\Rating;
 use App\Models\Transaction;
 use Illuminate\View\View;

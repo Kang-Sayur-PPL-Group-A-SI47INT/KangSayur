@@ -1,10 +1,7 @@
 <?php
 
-require __DIR__.'/auth.php';
-
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
@@ -28,11 +25,7 @@ Route::get('/farmer/dashboard', function () {
     return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');
 
-// Public farmer profile
-Route::get('/farmer/profile/{userId}', [Farmer\ProfileController::class, 'show'])->name('farmer.profile.show');
-
-
-Route::get('/average-price/{produce_id}', [ListingController::class, 'getAveragePrice']);
+require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
    
@@ -60,8 +53,6 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace', [Customer\MarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/marketplace/{listing}', [Customer\MarketplaceController::class, 'show'])->name('marketplace.show');
-
-    Route::get('/farmer/{id}', [MarketplaceController::class, 'showFarmer'])->name('farmer.show');
 });
 // Shopping Cart routes
 Route::middleware(['auth'])->group(function () {
