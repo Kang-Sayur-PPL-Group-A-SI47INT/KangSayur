@@ -14,6 +14,8 @@ class Transaction extends Model
         'delivery_name',
         'delivery_phone',
         'delivery_address',
+        'delivery_latitude',
+        'delivery_longitude',
         'status',
         'snap_token',
         'midtrans_order_id',
@@ -28,6 +30,8 @@ class Transaction extends Model
         return [
             'total_price' => 'decimal:2',
             'delivery_fee' => 'decimal:2',
+            'delivery_latitude' => 'decimal:8',
+            'delivery_longitude' => 'decimal:8',
             'paid_at' => 'datetime',
         ];
     }

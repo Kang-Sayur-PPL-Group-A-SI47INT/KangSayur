@@ -21,6 +21,7 @@ Route::get('/', function () {
     }
     return view('welcome', compact('featuredListings'));
 })->name('home');
+
 Route::get('/farmer/dashboard', function () {
     return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');

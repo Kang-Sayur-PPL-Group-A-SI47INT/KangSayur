@@ -107,15 +107,45 @@
                         <input type="text" name="address" value="{{ old('address', $user->address) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Latitude</label>
-                        <input type="text" name="latitude" value="{{ old('latitude', $user->latitude) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none" placeholder="-6.81148000">
+                {{-- Interactive Map for Farm Location --}}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📍 Lokasi Pertanian</label>
+                    <p class="text-xs text-gray-500 mb-3">Klik pada peta atau gunakan pencarian untuk menentukan lokasi pertanian Anda secara akurat.</p>
+
+                    {{-- Search Bar --}}
+                    <div class="relative mb-3">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" id="farmer-map-search" placeholder="Cari alamat atau nama tempat..."
+                            class="w-full pl-10 pr-24 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none text-sm">
+                        <button type="button" id="farmer-geolocate-btn"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                            </svg>
+                            Lokasi Saya
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Longitude</label>
-                        <input type="text" name="longitude" value="{{ old('longitude', $user->longitude) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none" placeholder="107.61878000">
+
+                    {{-- Map Container --}}
+                    <div id="farmer-map" class="w-full rounded-xl border-2 border-gray-200 overflow-hidden" style="height: 350px; z-index: 1;"></div>
+
+                    {{-- Coordinates Display --}}
+                    <div class="mt-3 flex items-center gap-4">
+                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg flex-1">
+                            <span class="text-xs text-gray-500 font-medium">Lat:</span>
+                            <span id="farmer-lat-display" class="text-xs font-mono text-gray-700">{{ $user->latitude ?? 'Belum diatur' }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg flex-1">
+                            <span class="text-xs text-gray-500 font-medium">Lng:</span>
+                            <span id="farmer-lng-display" class="text-xs font-mono text-gray-700">{{ $user->longitude ?? 'Belum diatur' }}</span>
+                        </div>
                     </div>
+
+                    {{-- Hidden Inputs --}}
+                    <input type="hidden" name="latitude" id="farmer-latitude" value="{{ old('latitude', $user->latitude) }}">
+                    <input type="hidden" name="longitude" id="farmer-longitude" value="{{ old('longitude', $user->longitude) }}">
                 </div>
                 <div class="flex items-center gap-3">
                     <input type="checkbox" name="is_public_profile" value="1" {{ $user->is_public_profile ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500" id="public_profile">
@@ -208,4 +238,146 @@
             @endif
         </div>
     </div>
+
+    {{-- Leaflet CSS & JS --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #farmer-map { cursor: crosshair !important; }
+        .leaflet-control-attribution { font-size: 9px !important; }
+        .farmer-map-pin {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Default to Bandung area if no coordinates set
+        const defaultLat = {{ $user->latitude ?? -6.9175 }};
+        const defaultLng = {{ $user->longitude ?? 107.6191 }};
+        const hasExisting = {{ ($user->latitude && $user->longitude) ? 'true' : 'false' }};
+
+        // Initialize map
+        const map = L.map('farmer-map', {
+            zoomControl: true,
+            scrollWheelZoom: true,
+        }).setView([defaultLat, defaultLng], hasExisting ? 15 : 12);
+
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Custom marker icon
+        const farmIcon = L.divIcon({
+            html: `<div style="
+                width: 36px; height: 36px;
+                background: linear-gradient(135deg, #22c55e, #059669);
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                border: 3px solid white;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+                display: flex; align-items: center; justify-content: center;
+            "><span style="transform: rotate(45deg); font-size: 16px;">🌾</span></div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 36],
+            className: 'farmer-map-pin',
+        });
+
+        let marker = null;
+
+        function placeMarker(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { icon: farmIcon, draggable: true }).addTo(map);
+                marker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    updateCoordinates(pos.lat, pos.lng);
+                });
+            }
+            updateCoordinates(lat, lng);
+        }
+
+        function updateCoordinates(lat, lng) {
+            const latFixed = parseFloat(lat).toFixed(8);
+            const lngFixed = parseFloat(lng).toFixed(8);
+            document.getElementById('farmer-latitude').value = latFixed;
+            document.getElementById('farmer-longitude').value = lngFixed;
+            document.getElementById('farmer-lat-display').textContent = latFixed;
+            document.getElementById('farmer-lng-display').textContent = lngFixed;
+        }
+
+        // Place existing marker
+        if (hasExisting) {
+            placeMarker(defaultLat, defaultLng);
+        }
+
+        // Click on map to place pin
+        map.on('click', function(e) {
+            placeMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Geolocation button
+        document.getElementById('farmer-geolocate-btn').addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert('Geolocation tidak didukung oleh browser Anda.');
+                return;
+            }
+            this.innerHTML = '<svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Mencari...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    map.setView([lat, lng], 16);
+                    placeMarker(lat, lng);
+                    this.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg> Lokasi Saya';
+                },
+                (error) => {
+                    alert('Tidak dapat mengakses lokasi: ' + error.message);
+                    this.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg> Lokasi Saya';
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        });
+
+        // Address search
+        let searchTimeout;
+        const searchInput = document.getElementById('farmer-map-search');
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch(this.value);
+            }
+        });
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            if (this.value.length >= 3) {
+                searchTimeout = setTimeout(() => performSearch(this.value), 800);
+            }
+        });
+
+        function performSearch(query) {
+            if (!query.trim()) return;
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=id`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        map.setView([lat, lng], 16);
+                        placeMarker(lat, lng);
+                    } else {
+                        alert('Lokasi tidak ditemukan. Coba kata kunci lain.');
+                    }
+                })
+                .catch(() => alert('Gagal mencari lokasi. Periksa koneksi internet Anda.'));
+        }
+
+        // Fix map rendering in case container was hidden
+        setTimeout(() => map.invalidateSize(), 200);
+    });
+    </script>
 </x-app-layout>
