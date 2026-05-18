@@ -13,7 +13,7 @@ return new class extends Migration
             $table->decimal('total_price', 12, 2);
             $table->decimal('delivery_fee', 10, 2)->default(0);
             $table->string('delivery_name', 100);
-            $table->string('delivery_phone', 20);
+            $table->string('delivery_phone', 16);
             $table->text('delivery_address');
             $table->enum('status', [
                 'pending',

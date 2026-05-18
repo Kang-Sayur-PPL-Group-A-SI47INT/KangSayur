@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use Illuminate\View\View;
+use Midtrans\Snap;
 
 class OrderController extends Controller
 {
@@ -56,4 +57,29 @@ class OrderController extends Controller
 
         return view('customer.orders', compact('orders'));
     }
+
+     public function pay(Transaction $transaction)
+    {
+        $params = [
+            'transaction_details' => [
+                'order_id'     => $transaction->midtrans_order_id,
+                'gross_amount' => $transaction->total_price + $transaction->delivery_fee,
+            ],
+            'customer_details' => [
+                'first_name' => auth()->user()->name ?? 'Customer',
+                'email'      => auth()->user()->email ?? 'customer@example.com',
+            ],
+            'item_details' => $transaction->items->map(fn($item) => [
+                'id'       => $item->listing->id ?? 1,
+                'price'    => $item->listing->price,
+                'quantity' => $item->quantity,
+                'name'     => $item->listing->title,
+            ])->toArray(),
+        ];
+
+        $snapToken = Snap::getSnapToken($params);
+
+        return response()->json(['snap_token' => $snapToken]);
+    }
+
 }

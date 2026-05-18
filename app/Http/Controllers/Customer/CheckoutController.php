@@ -47,7 +47,7 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'delivery_name' => 'required|string|max:100',
-            'delivery_phone' => 'required|string|max:20',
+            'delivery_phone' => 'required|digits_between:7,16|max:20',
             'delivery_address' => 'required|string|max:500',
         ]);
 

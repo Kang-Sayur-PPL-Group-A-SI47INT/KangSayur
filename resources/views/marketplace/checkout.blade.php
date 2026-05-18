@@ -43,7 +43,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input type="tel" name="delivery_phone" required value="{{ old('delivery_phone') }}" placeholder="08xxxxxxxxxx"
+                                <input type="tel" name="delivery_phone" required value="{{ old('delivery_phone') }}" placeholder="08xxxxxxxxxx" pattern="[0-9]*" inputmode="numeric" maxlength="16"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm transition-all duration-200">
                                 @error('delivery_phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>

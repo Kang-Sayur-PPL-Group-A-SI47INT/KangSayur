@@ -7,6 +7,9 @@ use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
+use App\Http\Controllers\MidtransController;
+
+Route::post('/midtrans/callback', [MidtransController::class, 'callback'])->name('midtrans.callback');
 
 Route::get('/', function () {
     $featuredListings = collect();
