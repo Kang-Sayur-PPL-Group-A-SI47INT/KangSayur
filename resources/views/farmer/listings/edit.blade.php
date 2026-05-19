@@ -1,8 +1,6 @@
 <x-app-layout>
     @php $title = 'Edit Listing'; @endphp
-
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         {{-- Back Link --}}
         <a href="{{ route('farmer.listings.index') }}"
            class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors mb-6 group">
@@ -11,16 +9,13 @@
             </svg>
             Back to My Listings
         </a>
-
         {{-- Title --}}
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Edit Listing ✏️</h1>
-
         {{-- Form Card --}}
         <div class="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <form method="POST" action="{{ route('farmer.listings.update', $listing) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-
                 {{-- Current Images Preview --}}
                 @php $existingImages = $listing->getImagesArray(); @endphp
                 @if(count($existingImages) > 0)
@@ -37,7 +32,6 @@
                     </div>
                 @endif
                 
-
 {{-- New Image Upload --}}
                 <div class="mb-8">
                     <label for="images" class="block text-sm font-semibold text-gray-700 mb-2">Upload New Images</label>
@@ -56,12 +50,8 @@
                         <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-
-
-
                 {{-- Form Grid --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                     {{-- Title (full width) --}}
                     <div class="md:col-span-2">
                         <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
@@ -72,7 +62,6 @@
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Produce Category --}}
                     <div>
                         <label for="produce_produce_id" class="block text-sm font-semibold text-gray-700 mb-2">Produce Category</label>
@@ -96,7 +85,6 @@
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Price --}}
                     <div>
                         <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">Price</label>
@@ -110,7 +98,6 @@
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Quantity --}}
                     <div>
                         <label for="quantity" class="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
@@ -121,7 +108,6 @@
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Unit --}}
                     <div>
                         <label for="unit" class="block text-sm font-semibold text-gray-700 mb-2">Unit</label>
@@ -132,7 +118,6 @@
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Status --}}
                     <div>
                         <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
@@ -148,11 +133,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
+                        <p id="statusHelp" class="text-xs text-amber-600 mt-1 hidden">⚠️ Tidak dapat mengaktifkan listing dengan stok 0.</p>
                         @error('status')
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Availability Date --}}
                     <div>
                         <label for="availability_date" class="block text-sm font-semibold text-gray-700 mb-2">Availability Date</label>
@@ -163,7 +148,6 @@
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     {{-- Description (full width) --}}
                     <div class="md:col-span-2">
                         <label for="content" class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
@@ -175,7 +159,6 @@
                         @enderror
                     </div>
                 </div>
-
                 {{-- Submit --}}
                 <div class="mt-8 flex justify-end">
                     <button type="submit"
@@ -189,4 +172,28 @@
             </form>
         </div>
     </div>
+    {{-- Quantity ↔ Status correlation JS --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const qtyInput = document.getElementById('quantity');
+        const statusSelect = document.getElementById('status');
+        const statusHelp = document.getElementById('statusHelp');
+        function enforceStatusRules() {
+            const qty = parseInt(qtyInput.value) || 0;
+            const activeOption = statusSelect.querySelector('option[value="active"]');
+            if (qty <= 0) {
+                activeOption.disabled = true;
+                statusHelp.classList.remove('hidden');
+                if (statusSelect.value === 'active') {
+                    statusSelect.value = 'inactive';
+                }
+            } else {
+                activeOption.disabled = false;
+                statusHelp.classList.add('hidden');
+            }
+        }
+        qtyInput.addEventListener('input', enforceStatusRules);
+        enforceStatusRules(); // Run on page load
+    });
+    </script>
 </x-app-layout>

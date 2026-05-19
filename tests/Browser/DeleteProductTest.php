@@ -14,7 +14,8 @@ class DeleteProductTest extends DuskTestCase
     public function test_delete_product(): void
     {
         $farmer = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
 
         $product = Produce::create([

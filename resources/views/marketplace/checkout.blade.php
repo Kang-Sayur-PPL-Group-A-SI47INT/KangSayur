@@ -53,6 +53,48 @@
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm resize-none transition-all duration-200">{{ old('delivery_address', auth()->user()->address) }}</textarea>
                                 @error('delivery_address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
+
+                            {{-- Delivery Location Map --}}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">📍 Pin Delivery Location</label>
+                                <p class="text-xs text-gray-500 mb-2">Click on the map or search to pin your exact delivery location for accurate shipping costs.</p>
+
+                                {{-- Map Search --}}
+                                <div class="relative mb-2">
+                                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                    <input type="text" id="checkout-map-search" placeholder="Search address..."
+                                        class="w-full pl-10 pr-28 py-2.5 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm">
+                                    <button type="button" id="checkout-geolocate-btn"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        My Location
+                                    </button>
+                                </div>
+
+                                {{-- Map --}}
+                                <div id="checkout-map" class="w-full rounded-xl border-2 border-gray-200 overflow-hidden" style="height: 280px; z-index: 1;"></div>
+
+                                {{-- Coordinate Badges --}}
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span id="checkout-coord-badge" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg text-xs text-gray-500">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                        <span id="checkout-coord-text">{{ ($userLatitude && $userLongitude) ? number_format($userLatitude, 6) . ', ' . number_format($userLongitude, 6) : 'Click map to pin location' }}</span>
+                                    </span>
+                                    <span id="checkout-distance-badge" class="hidden inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 rounded-lg text-xs text-green-700 font-medium">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                        <span id="checkout-distance-text"></span>
+                                    </span>
+                                </div>
+
+                                {{-- Hidden coordinate inputs --}}
+                                <input type="hidden" name="delivery_latitude" id="checkout-latitude" value="{{ old('delivery_latitude', $userLatitude) }}">
+                                <input type="hidden" name="delivery_longitude" id="checkout-longitude" value="{{ old('delivery_longitude', $userLongitude) }}">
+                            </div>
                         </div>
                     </div>
 
@@ -180,12 +222,212 @@
         </form>
     </div>
 
+    {{-- Leaflet CSS & JS --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #checkout-map { cursor: crosshair !important; }
+        .leaflet-control-attribution { font-size: 9px !important; }
+        .checkout-pin { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    </style>
+
     <script>
         // Prevent double submission
         document.getElementById('checkout-form').addEventListener('submit', function () {
             const btn = document.getElementById('checkout-submit-btn');
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Processing...';
+        });
+
+        // Checkout Map
+        document.addEventListener('DOMContentLoaded', function() {
+            const userLat = {{ $userLatitude ?? 'null' }};
+            const userLng = {{ $userLongitude ?? 'null' }};
+            const hasCoords = userLat !== null && userLng !== null;
+
+            // Farmer locations from cart items
+            const farmerLocations = [
+                @foreach($cart->items as $item)
+                    @if($item->listing->farmer && $item->listing->farmer->latitude && $item->listing->farmer->longitude)
+                    {
+                        lat: {{ $item->listing->farmer->latitude }},
+                        lng: {{ $item->listing->farmer->longitude }},
+                        name: @json($item->listing->farmer->name),
+                    },
+                    @endif
+                @endforeach
+            ];
+
+            // Center: user location > first farmer > Bandung default
+            const centerLat = hasCoords ? userLat : (farmerLocations.length ? farmerLocations[0].lat : -6.9175);
+            const centerLng = hasCoords ? userLng : (farmerLocations.length ? farmerLocations[0].lng : 107.6191);
+
+            const map = L.map('checkout-map', {
+                zoomControl: true,
+                scrollWheelZoom: true,
+            }).setView([centerLat, centerLng], hasCoords ? 14 : 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Customer pin icon
+            const customerIcon = L.divIcon({
+                html: `<div style="
+                    width: 32px; height: 32px;
+                    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                    border-radius: 50% 50% 50% 0;
+                    transform: rotate(-45deg);
+                    border: 3px solid white;
+                    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+                    display: flex; align-items: center; justify-content: center;
+                "><span style="transform: rotate(45deg); font-size: 14px;">📍</span></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                className: 'checkout-pin',
+            });
+
+            // Farmer pin icon
+            const farmerIcon = L.divIcon({
+                html: `<div style="
+                    width: 28px; height: 28px;
+                    background: linear-gradient(135deg, #22c55e, #059669);
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+                    display: flex; align-items: center; justify-content: center;
+                "><span style="font-size: 12px;">🌾</span></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14],
+                className: 'checkout-pin',
+            });
+
+            // Add farmer markers
+            const farmerMarkers = [];
+            const uniqueFarmers = [];
+            farmerLocations.forEach(f => {
+                if (!uniqueFarmers.find(u => u.lat === f.lat && u.lng === f.lng)) {
+                    uniqueFarmers.push(f);
+                    const fm = L.marker([f.lat, f.lng], { icon: farmerIcon })
+                        .addTo(map)
+                        .bindPopup(`<div class="text-xs font-medium">🌾 ${f.name}</div><div class="text-xs text-gray-500">Farmer Location</div>`);
+                    farmerMarkers.push(fm);
+                }
+            });
+
+            let customerMarker = null;
+
+            function haversineKm(lat1, lng1, lat2, lng2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lng2 - lng1) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            }
+
+            function placeCustomerPin(lat, lng) {
+                if (customerMarker) {
+                    customerMarker.setLatLng([lat, lng]);
+                } else {
+                    customerMarker = L.marker([lat, lng], { icon: customerIcon, draggable: true }).addTo(map);
+                    customerMarker.on('dragend', function(e) {
+                        const pos = e.target.getLatLng();
+                        updateCheckoutCoords(pos.lat, pos.lng);
+                    });
+                }
+                updateCheckoutCoords(lat, lng);
+            }
+
+            function updateCheckoutCoords(lat, lng) {
+                const latF = parseFloat(lat).toFixed(8);
+                const lngF = parseFloat(lng).toFixed(8);
+                document.getElementById('checkout-latitude').value = latF;
+                document.getElementById('checkout-longitude').value = lngF;
+                document.getElementById('checkout-coord-text').textContent = parseFloat(lat).toFixed(6) + ', ' + parseFloat(lng).toFixed(6);
+                document.getElementById('checkout-coord-badge').classList.remove('bg-gray-50', 'text-gray-500');
+                document.getElementById('checkout-coord-badge').classList.add('bg-blue-50', 'text-blue-700');
+
+                // Calculate max distance to farmers
+                if (uniqueFarmers.length > 0) {
+                    let maxDist = 0;
+                    uniqueFarmers.forEach(f => {
+                        const d = haversineKm(lat, lng, f.lat, f.lng);
+                        if (d > maxDist) maxDist = d;
+                    });
+                    const badge = document.getElementById('checkout-distance-badge');
+                    badge.classList.remove('hidden');
+                    document.getElementById('checkout-distance-text').textContent = '~' + maxDist.toFixed(1) + ' km from farm';
+                }
+            }
+
+            // Place existing pin
+            if (hasCoords) {
+                placeCustomerPin(userLat, userLng);
+            }
+
+            // Click to place pin
+            map.on('click', function(e) {
+                placeCustomerPin(e.latlng.lat, e.latlng.lng);
+            });
+
+            // Fit bounds to show all markers
+            if (hasCoords && uniqueFarmers.length > 0) {
+                const allPoints = [[userLat, userLng], ...uniqueFarmers.map(f => [f.lat, f.lng])];
+                map.fitBounds(allPoints, { padding: [30, 30], maxZoom: 14 });
+            }
+
+            // Geolocation
+            document.getElementById('checkout-geolocate-btn').addEventListener('click', function() {
+                if (!navigator.geolocation) { alert('Geolocation is not supported.'); return; }
+                const btn = this;
+                btn.innerHTML = '<svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Finding...';
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                        placeCustomerPin(pos.coords.latitude, pos.coords.longitude);
+                        btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg> My Location';
+                    },
+                    (err) => {
+                        alert('Could not get location: ' + err.message);
+                        btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg> My Location';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            });
+
+            // Address search
+            let searchTimer;
+            const searchInput = document.getElementById('checkout-map-search');
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); doSearch(this.value); }
+            });
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                if (this.value.length >= 3) searchTimer = setTimeout(() => doSearch(this.value), 800);
+            });
+
+            function doSearch(query) {
+                if (!query.trim()) return;
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=id`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lng = parseFloat(data[0].lon);
+                            map.setView([lat, lng], 16);
+                            placeCustomerPin(lat, lng);
+                        } else {
+                            alert('Location not found. Try different keywords.');
+                        }
+                    })
+                    .catch(() => alert('Search failed. Check your internet connection.'));
+            }
+
+            setTimeout(() => map.invalidateSize(), 200);
         });
     </script>
 </x-app-layout>

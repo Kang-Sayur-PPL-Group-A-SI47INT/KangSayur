@@ -15,12 +15,13 @@ class FavoriteTest extends DuskTestCase
     public function testFavoriteRemove(): void
     {
         $user = User::factory()->create([
-            'role'=>'customer',
+            'role' => 'customer',
         ]);
 
-        
+
         $farmer = User::factory()->create([
             'role' => 'farmer',
+            'verification_status' => 'verified',
         ]);
 
         $produce = Produce::create([
@@ -51,20 +52,21 @@ class FavoriteTest extends DuskTestCase
                 ->clickLink('Favorites')
                 ->click('@add-to-favoritePage')
                 ->assertSee('Removed from favorites.');
-                #success favorite remove
+            #success favorite remove
         });
-        
+
 
     }
     public function testFavoriteCheck(): void
     {
         $user = User::factory()->create([
-            'role'=>'customer',
+            'role' => 'customer',
         ]);
 
-        
+
         $farmer = User::factory()->create([
             'role' => 'farmer',
+            'verification_status' => 'verified',
         ]);
 
         $produce = Produce::create([
@@ -90,21 +92,22 @@ class FavoriteTest extends DuskTestCase
                 ->assertPathIs('/favorites')
                 ->clickLink('Explore Marketplace')
                 ->assertPathIs('/marketplace');
-                #check favorite
+            #check favorite
         });
-        
+
 
     }
 
     public function testFavoriteAdd(): void
     {
         $user = User::factory()->create([
-            'role'=>'customer',
+            'role' => 'customer',
         ]);
 
-        
+
         $farmer = User::factory()->create([
             'role' => 'farmer',
+            'verification_status' => 'verified',
         ]);
 
         $produce = Produce::create([
@@ -132,9 +135,9 @@ class FavoriteTest extends DuskTestCase
                 ->assertPathIs('/marketplace')
                 ->click('@add-to-favorite')
                 ->waitForText('Added to favorites!');
-                #success favorite added
+            #success favorite added
         });
-        
+
 
     }
 }

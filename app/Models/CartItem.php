@@ -46,4 +46,12 @@ class CartItem extends Model
     {
         return $this->quantity * $this->unitPrice();
     }
+
+    /**
+     * Get subtotal attribute for property access.
+     */
+    public function getSubtotalAttribute(): float
+    {
+        return $this->subtotal();
+    }
 }

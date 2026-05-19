@@ -17,7 +17,7 @@ class LogoutTest extends DuskTestCase
         $user = User::factory()->create([
             'role' => 'customer'
         ]);
-        
+
         $this->browse(function ($browser) use ($user): void {
             $browser->loginAs($user)
                 ->visit('/marketplace')
@@ -30,7 +30,7 @@ class LogoutTest extends DuskTestCase
                 ->press('Log Out')
                 ->pause(1000)
                 ->assertPathIs('/')
-                ;
+            ;
         });
     }
 
@@ -41,16 +41,17 @@ class LogoutTest extends DuskTestCase
             $browser->visit('/marketplace')
                 ->assertPathIs('/login')
                 ->assertSee('Welcome Back')
-                ;
+            ;
         });
     }
 
     public function test_logout_farmer_success(): void
     {
         $user = User::factory()->create([
-            'role' => 'farmer'
+            'role' => 'farmer',
+            'verification_status' => 'verified'
         ]);
-        
+
         $this->browse(function ($browser) use ($user): void {
             $browser->loginAs($user)
                 ->visit('/farmer/dashboard')
@@ -63,7 +64,7 @@ class LogoutTest extends DuskTestCase
                 ->press('Log Out')
                 ->pause(1000)
                 ->assertPathIs('/')
-                ;
+            ;
         });
     }
 }

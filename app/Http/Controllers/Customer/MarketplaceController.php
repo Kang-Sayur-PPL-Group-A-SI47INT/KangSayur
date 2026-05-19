@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Models\Produce;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -28,7 +29,7 @@ class MarketplaceController extends Controller
         // Category filter
         if ($request->filled('category')) {
             $query->whereHas('produce', fn($q) => $q->where('category', $request->category));
-        } 
+        }
 
         // Price range
         if ($request->filled('min_price')) {
@@ -45,8 +46,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'score')
-                ->having('ratings_avg_score', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'rating')
+                ->having('ratings_avg_rating', '>=', $request->min_rating);
         }
 
         // Sort
@@ -65,9 +66,9 @@ class MarketplaceController extends Controller
             ->whereNotNull('city')
             ->distinct()
             ->pluck('city');
-        
 
-        
+
+
 
         return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
@@ -102,7 +103,7 @@ class MarketplaceController extends Controller
 
         return view('farmer.profile.show', compact('farmer', 'score'));
     }
-    
+
     private function sortByNearest($query)
     {
         $user = auth()->user();
