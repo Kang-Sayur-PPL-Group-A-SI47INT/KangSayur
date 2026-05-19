@@ -102,8 +102,9 @@
                     <div>
                         <label for="quantity" class="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
                         <input type="number" name="quantity" id="quantity" value="{{ old('quantity', $listing->quantity) }}"
-                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400 transition-all"
-                               placeholder="50" required min="1">
+                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400 transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                               placeholder="50" required min="0">
+                        <p id="quantityHelp" class="text-xs text-amber-600 mt-1 hidden">⚠️ Quantity tidak dapat diubah saat status Inactive.</p>
                         @error('quantity')
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
@@ -127,13 +128,12 @@
                                     required>
                                 <option value="active" {{ old('status', $listing->status) === 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="inactive" {{ old('status', $listing->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                <option value="sold_out" {{ old('status', $listing->status) === 'sold_out' ? 'selected' : '' }}>Sold Out</option>
                             </select>
                             <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
-                        <p id="statusHelp" class="text-xs text-amber-600 mt-1 hidden">⚠️ Tidak dapat mengaktifkan listing dengan stok 0.</p>
+                        <p id="statusHelp" class="text-xs text-amber-600 mt-1 hidden">⚠️ Quantity akan di-set ke 0 saat di-save karena stok habis.</p>
                         @error('status')
                             <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                         @enderror
@@ -178,22 +178,38 @@
         const qtyInput = document.getElementById('quantity');
         const statusSelect = document.getElementById('status');
         const statusHelp = document.getElementById('statusHelp');
-        function enforceStatusRules() {
+        const quantityHelp = document.getElementById('quantityHelp');
+
+        function enforceRules() {
             const qty = parseInt(qtyInput.value) || 0;
-            const activeOption = statusSelect.querySelector('option[value="active"]');
+            const status = statusSelect.value;
+
+            // Tampilkan warning jika stok habis
             if (qty <= 0) {
-                activeOption.disabled = true;
                 statusHelp.classList.remove('hidden');
-                if (statusSelect.value === 'active') {
-                    statusSelect.value = 'inactive';
-                }
             } else {
-                activeOption.disabled = false;
                 statusHelp.classList.add('hidden');
             }
+
+            // Jika status Inactive, quantity tidak bisa di-edit
+            if (status === 'inactive') {
+                qtyInput.disabled = true;
+                quantityHelp.classList.remove('hidden');
+            } else {
+                qtyInput.disabled = false;
+                quantityHelp.classList.add('hidden');
+            }
         }
-        qtyInput.addEventListener('input', enforceStatusRules);
-        enforceStatusRules(); // Run on page load
+
+        // Re-enable quantity before form submit so the value gets sent
+        const form = qtyInput.closest('form');
+        form.addEventListener('submit', function() {
+            qtyInput.disabled = false;
+        });
+
+        qtyInput.addEventListener('input', enforceRules);
+        statusSelect.addEventListener('change', enforceRules);
+        enforceRules(); // Run on page load
     });
     </script>
 </x-app-layout>
