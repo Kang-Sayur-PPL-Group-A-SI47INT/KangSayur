@@ -12,6 +12,7 @@ use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
 use App\Http\Controllers\Admin;
+
 Route::get('/', function () {
     $featuredListings = collect();
     // Only query if the listings table exists
@@ -56,6 +57,14 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
         Route::get('/orders', [Farmer\OrderController::class, 'index'])->name('orders.index');
         Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
         Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
+
+        // Harvest Calendar
+        Route::get('/harvest-calendar', [HarvestScheduleController::class, 'index'])->name('harvest-calendar.index');
+        Route::post('/harvest-schedules', [HarvestScheduleController::class, 'store'])->name('harvest-schedules.store');
+        Route::put('/harvest-schedules/{harvestSchedule}', [HarvestScheduleController::class, 'update'])->name('harvest-schedules.update');
+        Route::delete('/harvest-schedules/{harvestSchedule}', [HarvestScheduleController::class, 'destroy'])->name('harvest-schedules.destroy');
+        // Harvest Calendar
+        Route::get('/harvest-calendar', [Farmer\HarvestScheduleController::class, 'index'])->name('harvest-calendar.index');
     });
 });
 Route::middleware('auth')->group(function () {
