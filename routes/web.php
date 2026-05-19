@@ -7,9 +7,10 @@ use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
-use App\Http\Controllers\MidtransController;
 
-Route::post('/midtrans/callback', [MidtransController::class, 'callback'])->name('midtrans.callback');
+Route::post('/checkout/{transaction_id}/pay', [Customer\OrderController::class, 'pay'])
+     ->name('customer.checkout.pay');
+
 
 Route::get('/', function () {
     $featuredListings = collect();

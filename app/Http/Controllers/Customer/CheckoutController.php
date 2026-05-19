@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+
 class CheckoutController extends Controller
 {
     /**
@@ -41,7 +42,7 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Process the checkout — create transaction and redirect to payment simulation.
+     * Process the checkout — create transaction and redirect to payment.
      */
     public function process(Request $request)
     {
@@ -108,7 +109,7 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Show the payment simulation page.
+     * Show the payment page.
      */
     public function paymentPage(Transaction $transaction)
     {
