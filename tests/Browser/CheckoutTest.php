@@ -26,10 +26,10 @@ class CheckoutTest extends DuskTestCase
                     ->assertPathIs('/cart')
                     ->click('@proceed-to-checkout')
                     ->type('delivery_name','test')
-                    ->type('delivery_phone','676767')
+                    ->type('delivery_phone','676767676767')
                     ->type('delivery_address','Jl. Telkomsel')
                     ->click('@proceed-to-payment')
-                    ->assertSee('Complete Your Payment')
+                    ->waitForText('Complete Your Payment')
                     ->click('@payment-method')
                     ->click('@confirm-pay')
                     ->waitForText('Payment successful! Your order is being processed.'); 

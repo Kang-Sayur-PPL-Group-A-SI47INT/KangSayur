@@ -12,6 +12,11 @@ use App\Http\Controllers\Customer\FavoriteController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
 use App\Http\Controllers\Admin;
+
+Route::post('/checkout/{transaction_id}/pay', [Customer\OrderController::class, 'pay'])
+     ->name('customer.checkout.pay');
+
+
 Route::get('/', function () {
     $featuredListings = collect();
     // Only query if the listings table exists

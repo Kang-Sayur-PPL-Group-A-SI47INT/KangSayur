@@ -51,7 +51,7 @@ class CartTest extends DuskTestCase
                 ->assertPathIs('/cart')
                 #success cart
                 ->click('@cart-remove')
-                ->assertSee('Item removed from cart.');
+                ->waitForText('Item removed from cart.');
         });
     }
 }

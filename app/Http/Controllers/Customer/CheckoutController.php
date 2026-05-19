@@ -41,13 +41,13 @@ class CheckoutController extends Controller
         ));
     }
     /**
-     * Process the checkout — create transaction and redirect to payment simulation.
+     * Process the checkout — create transaction and redirect to payment.
      */
     public function process(Request $request)
     {
         $request->validate([
             'delivery_name' => 'required|string|max:100',
-            'delivery_phone' => 'required|string|max:20',
+            'delivery_phone' => 'required|digits_between:7,16|max:20',
             'delivery_address' => 'required|string|max:500',
             'delivery_latitude' => 'nullable|numeric|between:-90,90',
             'delivery_longitude' => 'nullable|numeric|between:-180,180',
@@ -115,7 +115,7 @@ class CheckoutController extends Controller
         }
     }
     /**
-     * Show the payment simulation page.
+     * Show the payment page.
      */
     public function paymentPage(Transaction $transaction)
     {

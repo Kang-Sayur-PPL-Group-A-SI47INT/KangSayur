@@ -28,7 +28,6 @@ class CartItem extends Model
      /** Get effective unit price. **/
     public function unitPrice(): float
     {
-
         return $this->listing->price;
     }
 
