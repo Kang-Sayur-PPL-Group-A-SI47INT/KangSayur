@@ -63,6 +63,7 @@ class Listing extends Model
     {
         return $this->hasMany(Offer::class, 'listing_listing_id', 'listing_id');
     }
+
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class, 'listing_listing_id', 'listing_id');
@@ -77,7 +78,7 @@ class Listing extends Model
     }
     public function averageRating()
     {
-        return $this->ratings()->avg('score') ?? 0;
+        return $this->ratings()->avg('rating');
     }
     public function isActive(): bool
     {
