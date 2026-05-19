@@ -48,3 +48,4 @@ class HarvestScheduleController extends Controller
             'nextMonth'    => $date->copy()->addMonth(),
         ]);
     }
+}
