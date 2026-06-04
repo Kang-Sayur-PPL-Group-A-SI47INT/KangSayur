@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\BannedIdentifier;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -39,6 +40,11 @@ class RegisteredUserController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak sesuai.',
             'password.min' => 'Password minimal 8 karakter.',
         ]);
+
+        $bannedEmail = BannedIdentifier::where('type', 'email')->where('value', $request->email)->exists();
+        if ($bannedEmail) {
+            return back()->withErrors(['email' => 'Email ini telah diblokir dan tidak dapat digunakan untuk mendaftar.'])->withInput();
+        }
 
         $user = User::create([
             'name' => $request->name,

@@ -17,10 +17,14 @@ class Transaction extends Model
         'delivery_latitude',
         'delivery_longitude',
         'status',
+        'shipping_proof',
+        'shipping_proof_uploaded_at',
         'snap_token',
         'midtrans_order_id',
         'payment_type',
         'paid_at',
+        'paid_status_at',
+        'customer_cancel_deadline',
         'user_user_id',
         'cart_cart_id',
     ];
@@ -33,6 +37,9 @@ class Transaction extends Model
             'delivery_latitude' => 'decimal:8',
             'delivery_longitude' => 'decimal:8',
             'paid_at' => 'datetime',
+            'paid_status_at' => 'datetime',
+            'shipping_proof_uploaded_at' => 'datetime',
+            'customer_cancel_deadline' => 'datetime',
         ];
     }
 
@@ -53,7 +60,7 @@ class Transaction extends Model
 
     public function isCompleted(): bool
     {
-        return $this->status === 'completed';
+        return $this->status === 'delivered';
     }
 
     /**
@@ -77,7 +84,71 @@ class Transaction extends Model
      */
     public function isPaid(): bool
     {
-        return in_array($this->status, ['paid', 'processing', 'shipped', 'delivered']);
+        return in_array($this->status, ['paid', 'processing', 'shipping', 'shipped', 'delivered']);
+    }
+
+    /**
+     * Check if customer can still cancel this order.
+     * Only within 5 minutes of order creation AND before shipping.
+     */
+    public function canCustomerCancel(): bool
+    {
+        if (in_array($this->status, ['shipping', 'shipped', 'delivered', 'cancelled'])) {
+            return false;
+        }
+
+        if ($this->customer_cancel_deadline) {
+            return now()->lt($this->customer_cancel_deadline);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if order can be cancelled at all (by admin).
+     */
+    public function canBeCancelled(): bool
+    {
+        return !in_array($this->status, ['shipping', 'shipped', 'delivered', 'cancelled']);
+    }
+
+    /**
+     * Check if shipping proof is overdue (6 hours after payment without proof).
+     */
+    public function isShippingProofOverdue(): bool
+    {
+        if ($this->status !== 'paid') {
+            return false;
+        }
+
+        if ($this->shipping_proof) {
+            return false;
+        }
+
+        if (!$this->paid_status_at) {
+            return false;
+        }
+
+        return now()->gt($this->paid_status_at->addHours(6));
+    }
+
+    /**
+     * Check if shipping proof has been uploaded.
+     */
+    public function hasShippingProof(): bool
+    {
+        return !empty($this->shipping_proof);
+    }
+
+    /**
+     * Get remaining time for shipping proof deadline.
+     */
+    public function shippingProofDeadline()
+    {
+        if ($this->paid_status_at) {
+            return $this->paid_status_at->addHours(6);
+        }
+        return null;
     }
 
     /**
@@ -89,6 +160,7 @@ class Transaction extends Model
             'pending' => 'Awaiting Payment',
             'paid' => 'Paid',
             'processing' => 'Processing',
+            'shipping' => 'Shipping',
             'shipped' => 'Shipped',
             'delivered' => 'Delivered',
             'cancelled' => 'Cancelled',
@@ -105,6 +177,7 @@ class Transaction extends Model
             'pending' => 'bg-yellow-100 text-yellow-700',
             'paid' => 'bg-blue-100 text-blue-700',
             'processing' => 'bg-indigo-100 text-indigo-700',
+            'shipping' => 'bg-purple-100 text-purple-700',
             'shipped' => 'bg-purple-100 text-purple-700',
             'delivered' => 'bg-green-100 text-green-700',
             'cancelled' => 'bg-red-100 text-red-700',
