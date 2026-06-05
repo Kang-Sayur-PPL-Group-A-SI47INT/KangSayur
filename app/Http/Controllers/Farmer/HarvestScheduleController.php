@@ -113,4 +113,22 @@ class HarvestScheduleController extends Controller
 
         return back()->with('success', 'Harvest schedule updated successfully!');
     }
+
+    public function destroy(HarvestSchedule $harvestSchedule): RedirectResponse
+    {
+        $farmer = auth()->user();
+        $farmerListingIds = $farmer->listings()->pluck('listing_id')->toArray();
+
+        if (!in_array($harvestSchedule->listing_id, $farmerListingIds)) {
+            abort(403);
+        }
+
+        if ($harvestSchedule->isPast()) {
+            return back()->with('error', 'Cannot delete past harvest schedules.');
+        }
+
+        $harvestSchedule->delete();
+
+        return back()->with('success', 'Harvest schedule deleted successfully!');
+    }
 }
