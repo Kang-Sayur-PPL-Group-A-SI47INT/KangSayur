@@ -76,4 +76,41 @@ class HarvestScheduleController extends Controller
 
         return back()->with('success', 'Harvest schedule created successfully!');
     }
+
+    public function update(Request $request, HarvestSchedule $harvestSchedule): RedirectResponse
+    {
+        $farmer = auth()->user();
+        $farmerListingIds = $farmer->listings()->pluck('listing_id')->toArray();
+
+        if (!in_array($harvestSchedule->listing_id, $farmerListingIds)) {
+            abort(403);
+        }
+
+        if ($harvestSchedule->isPast()) {
+            return back()->with('error', 'Cannot edit past harvest schedules.');
+        }
+
+        $validated = $request->validate([
+            'listing_id'        => ['required', 'integer', function ($attr, $value, $fail) use ($farmerListingIds) {
+                if (!in_array((int) $value, $farmerListingIds)) {
+                    $fail('The selected listing does not belong to you.');
+                }
+            }],
+            'availability_date' => 'required|date|after:today',
+            'estimated_stock'   => 'required|integer|min:1',
+        ]);
+
+        $exists = HarvestSchedule::where('listing_id', $validated['listing_id'])
+            ->where('availability_date', $validated['availability_date'])
+            ->where('id', '!=', $harvestSchedule->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['availability_date' => 'A schedule already exists for this listing on the selected date.'])->withInput();
+        }
+
+        $harvestSchedule->update($validated);
+
+        return back()->with('success', 'Harvest schedule updated successfully!');
+    }
 }
