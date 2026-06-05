@@ -77,8 +77,8 @@ class CheckoutController extends Controller
         $orderId = 'KS-' . strtoupper(Str::random(8)) . '-' . time();
         try {
             $transaction = DB::transaction(function () use (
-                $request, $user, $cart, $subtotal, $deliveryFee, $orderId
-            ) {
+                $request, $user, $cart, $subtotal, $deliveryFee, $orderId, $deliveryLat, $deliveryLng,
+            ) {                                                   #not mine but i added cuz i cant continue
                 // Create the transaction record
                 $transaction = Transaction::create([
                     'total_price' => $subtotal,

@@ -61,8 +61,7 @@
 
                     @if($order->status === 'pending')
                     <div class="mt-4">
-                        
-                        <h1 class="text-green-700">INI BUAT TEST</h1>
+                    
                     </div>
                     @endif
                 </div>
