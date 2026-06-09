@@ -270,7 +270,7 @@
             <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showEdit = false"></div>
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10"
                  @click.away="showEdit = false">
-                <form method="POST" :action="editAction" class="p-6">
+                <form dusk="edit-schedule-form" method="POST" :action="editAction" class="p-6">
                     @csrf
                     @method('PUT')
                     <div class="flex items-center justify-between mb-5">
