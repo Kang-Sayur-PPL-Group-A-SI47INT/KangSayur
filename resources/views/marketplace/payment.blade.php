@@ -286,20 +286,31 @@
                     </button>
                 </div>
             </div>
+        
+        {{-- Cancel Order --}}
+        @if($transaction->status === 'pending')
+            <div class="mt-4 text-center">
+                <form method="POST" action="{{ route('customer.orders.cancel', $transaction->transaction_id) }}"
+                    onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.')">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 border-2 border-red-300 text-red-600 text-sm font-semibold rounded-full hover:bg-red-50 hover:border-red-400 transition-all duration-200">
+                        <svg class="w-4 h-4" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Cancel Order
+                    </button>
+                </form>
+            </div>
+        @endif
+        
 
         </div>
-
-        <div class="text-center space-y-3">
-            <p class="text-xs text-gray-400 flex items-center justify-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-                Secured by Midtrans · Sandbox Mode
-            </p>
             <a href="{{ route('customer.orders') }}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 View my orders
             </a>
         </div>
-    </div>
 
     {{-- Midtrans Core API JS (for card tokenization) --}}
     <script src="https://api.sandbox.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js"
