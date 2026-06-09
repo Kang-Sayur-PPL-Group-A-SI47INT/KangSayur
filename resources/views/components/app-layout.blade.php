@@ -55,6 +55,9 @@
                                         <a href="{{ route('farmer.orders.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.orders*') ? 'nav-link-active' : 'nav-link' }}">
                                             Orders
                                         </a>
+                                        <a href="{{ route('farmer.harvest-calendar.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.harvest-calendar*') ? 'nav-link-active' : 'nav-link' }}">
+                                            Calendar
+                                        </a>
                                     @endif
                                 </div>
                             @endauth

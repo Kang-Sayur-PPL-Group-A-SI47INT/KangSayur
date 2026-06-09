@@ -15,8 +15,8 @@ class OrderController extends Controller
     {
         $listingIds = auth()->user()->listings()->pluck('listing_id');
 
-        $orders = Transaction::with(['user', 'cart.items.listing'])
-            ->whereHas('cart.items', fn($q) => $q->whereIn('listing_listing_id', $listingIds))
+        $orders = Transaction::with(['user', 'items.listing'])
+            ->whereHas('items', fn($q) => $q->whereIn('listing_listing_id', $listingIds))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -26,7 +26,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Transaction $transaction): RedirectResponse
     {
         $listingIds = auth()->user()->listings()->pluck('listing_id')->toArray();
-        $hasItems = $transaction->cart->items->contains(fn($item) => in_array($item->listing_listing_id, $listingIds));
+        $hasItems = $transaction->items->contains(fn($item) => in_array($item->listing_listing_id, $listingIds));
 
         if (!$hasItems) {
             abort(403);
@@ -41,7 +41,7 @@ class OrderController extends Controller
     public function destroy(Transaction $transaction): RedirectResponse
     {
         $listingIds = auth()->user()->listings()->pluck('listing_id')->toArray();
-        $hasItems = $transaction->cart->items->contains(fn($item) => in_array($item->listing_listing_id, $listingIds));
+        $hasItems = $transaction->items->contains(fn($item) => in_array($item->listing_listing_id, $listingIds));
 
         if (!$hasItems) {
             abort(403);

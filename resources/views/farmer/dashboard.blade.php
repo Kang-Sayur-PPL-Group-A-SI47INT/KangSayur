@@ -41,31 +41,32 @@
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Pending Offers -->
+            <!-- Recent Orders -->
             <div class="bg-white rounded-2xl border border-gray-100 p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-gray-900">Incoming Offers</h2>
-                    <a href="{{ route('farmer.offers.index') }}" class="text-sm text-green-700 hover:text-green-800 font-medium">View All →</a>
+                    <h2 class="text-lg font-bold text-gray-900">Recent Orders</h2>
+                    <a href="{{ route('farmer.orders.index') }}" class="text-sm text-green-700 hover:text-green-800 font-medium">View All →</a>
                 </div>
                 <div class="space-y-3">
-                    @forelse($recentOffers as $offer)
+                    @forelse($recentOrders as $order)
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                             <div class="min-w-0 flex-1">
-                                <p class="font-semibold text-gray-900 text-sm">{{ $offer->user->name }}</p>
-                                <p class="text-xs text-gray-500 truncate">{{ $offer->listing->title }}</p>
-                                <p class="text-green-700 font-bold text-sm mt-1">Rp {{ number_format($offer->offered_price, 0, ',', '.') }}</p>
+                                <p class="font-semibold text-gray-900 text-sm">{{ $order->user->name ?? 'Customer' }}</p>
+                                <p class="text-xs text-gray-500 truncate">
+                                    {{ $order->items->map(fn($item) => ($item->listing->title ?? 'Item') . ' (x' . $item->quantity . ')')->implode(', ') }}
+                                </p>
+                                <p class="text-green-700 font-bold text-sm mt-1">Rp {{ number_format($order->grandTotal(), 0, ',', '.') }}</p>
                             </div>
                             <div class="flex gap-2 flex-shrink-0 ml-3">
-                                <a href="{{ route('farmer.offers.show', $offer) }}" class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium hover:bg-green-200">View</a>
-                                <form method="POST" action="{{ route('farmer.offers.reject', $offer) }}">@csrf
-                                    <button class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100">Reject</button>
-                                </form>
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full {{ $order->status === 'paid' ? 'bg-blue-100 text-blue-700' : ($order->status === 'completed' || $order->status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700') }}">
+                                    {{ ucfirst($order->status) }}
+                                </span>
                             </div>
                         </div>
                     @empty
                         <div class="text-center py-8">
-                            <div class="text-4xl mb-2">💬</div>
-                            <p class="text-gray-400 text-sm">No pending offers</p>
+                            <div class="text-4xl mb-2">📦</div>
+                            <p class="text-gray-400 text-sm">No recent orders</p>
                         </div>
                     @endforelse
                 </div>
@@ -104,7 +105,6 @@
         <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
             @foreach([
                 ['route' => 'farmer.listings.index', 'icon' => '🌱', 'label' => 'Manage Produce'],
-                ['route' => 'farmer.offers.index', 'icon' => '💬', 'label' => 'My Offers'],
                 ['route' => 'farmer.orders.index', 'icon' => '📦', 'label' => 'Orders'],
                 ['route' => 'farmer.harvest-calendar.index', 'icon' => '📅', 'label' => 'Harvest Calendar'],
                 ['route' => 'farmer.profile.edit', 'icon' => '👤', 'label' => 'Edit Profile'],

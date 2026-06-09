@@ -59,12 +59,10 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
         Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
 
         // Harvest Calendar
-        Route::get('/harvest-calendar', [HarvestScheduleController::class, 'index'])->name('harvest-calendar.index');
-        Route::post('/harvest-schedules', [HarvestScheduleController::class, 'store'])->name('harvest-schedules.store');
-        Route::put('/harvest-schedules/{harvestSchedule}', [HarvestScheduleController::class, 'update'])->name('harvest-schedules.update');
-        Route::delete('/harvest-schedules/{harvestSchedule}', [HarvestScheduleController::class, 'destroy'])->name('harvest-schedules.destroy');
-        // Harvest Calendar
         Route::get('/harvest-calendar', [Farmer\HarvestScheduleController::class, 'index'])->name('harvest-calendar.index');
+        Route::post('/harvest-schedules', [Farmer\HarvestScheduleController::class, 'store'])->name('harvest-schedules.store');
+        Route::put('/harvest-schedules/{harvestSchedule}', [Farmer\HarvestScheduleController::class, 'update'])->name('harvest-schedules.update');
+        Route::delete('/harvest-schedules/{harvestSchedule}', [Farmer\HarvestScheduleController::class, 'destroy'])->name('harvest-schedules.destroy');
     });
 });
 Route::middleware('auth')->group(function () {
