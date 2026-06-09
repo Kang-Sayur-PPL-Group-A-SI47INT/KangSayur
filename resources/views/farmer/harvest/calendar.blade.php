@@ -75,7 +75,7 @@
                         $isToday = $dateStr === $today;
                         $daySchedules = $schedules->get($day, collect());
                     @endphp
-                    <div class="min-h-[100px] sm:min-h-[120px] border-b border-r border-gray-50 p-1.5 sm:p-2 relative transition-colors duration-150
+                    <div dusk="day-cell-{{ $day }}" class="min-h-[100px] sm:min-h-[120px] border-b border-r border-gray-50 p-1.5 sm:p-2 relative transition-colors duration-150
                         {{ $isPast ? 'bg-gray-50/50' : 'hover:bg-green-50/30 cursor-pointer' }}
                         {{ $isToday ? 'ring-2 ring-inset ring-green-500/40 bg-green-50/20' : '' }}"
                         @if($daySchedules->count() > 0)
@@ -155,8 +155,43 @@
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <div class="space-y-3" id="date-detail-content">
-                        {{-- Populated from calendar data --}}
+                    <div class="space-y-3">
+                        <template x-for="s in (schedulesData[selectedDay] || [])" :key="s.id">
+                            <div class="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-gray-900 text-sm" x-text="s.title"></p>
+                                        <p class="text-xs text-gray-500 mt-0.5" x-text="s.dateLabel"></p>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
+                                                  :class="s.isPast ? 'bg-gray-200 text-gray-500' : 'bg-emerald-100 text-emerald-700'">
+                                                <span x-text="'📦 ' + s.stock + ' units'"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <template x-if="!s.isPast">
+                                        <div class="flex gap-1.5 ml-3 flex-shrink-0">
+                                            <button @click="openEditModal(s.id, s.listing_id, s.date, s.stock)"
+                                                :dusk="'edit-schedule-' + s.id"
+                                                class="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Edit">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </button>
+                                            <button @click="openDeleteModal(s.id)"
+                                                :dusk="'delete-schedule-' + s.id"
+                                                class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Delete">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template x-if="s.isPast">
+                                        <span class="text-[10px] font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full ml-3">Past</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="(schedulesData[selectedDay] || []).length === 0">
+                            <p class="text-gray-400 text-sm text-center py-4">No schedules for this date.</p>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -369,48 +404,6 @@
                 openDateDetail(day, label) {
                     this.selectedDay = day;
                     this.selectedDateLabel = label;
-
-                    const schedules = this.schedulesData[day] || [];
-                    const container = document.getElementById('date-detail-content');
-                    container.innerHTML = '';
-
-                    if (schedules.length === 0) {
-                        container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No schedules for this date.</p>';
-                    } else {
-                        schedules.forEach(s => {
-                            const card = document.createElement('div');
-                            card.className = 'p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors';
-                            card.innerHTML = `
-                                <div class="flex items-start justify-between">
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-semibold text-gray-900 text-sm">${s.title}</p>
-                                        <p class="text-xs text-gray-500 mt-0.5">${s.dateLabel}</p>
-                                        <div class="flex items-center gap-2 mt-2">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${s.isPast ? 'bg-gray-200 text-gray-500' : 'bg-emerald-100 text-emerald-700'}">
-                                                📦 ${s.stock} units
-                                            </span>
-                                        </div>
-                                    </div>
-                                    ${!s.isPast ? `
-                                    <div class="flex gap-1.5 ml-3 flex-shrink-0">
-                                        <button onclick="document.querySelector('[x-data]').__x.$data.openEditModal(${s.id}, '${s.listing_id}', '${s.date}', ${s.stock})"
-                                            class="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Edit">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-                                        <button onclick="document.querySelector('[x-data]').__x.$data.openDeleteModal(${s.id})"
-                                            class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Delete">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </div>
-                                    ` : `
-                                    <span class="text-[10px] font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full ml-3">Past</span>
-                                    `}
-                                </div>
-                            `;
-                            container.appendChild(card);
-                        });
-                    }
-
                     this.showDateDetail = true;
                 },
 
