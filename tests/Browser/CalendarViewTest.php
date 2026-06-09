@@ -23,4 +23,19 @@ class CalendarViewTest extends DuskTestCase
                 ->assertSee('Plan and track your upcoming harvests');
         });
     }
+
+    public function testUnverifiedFarmer(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'unverified',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs($user)
+                ->visit('/farmer/harvest-calendar')
+                ->waitForLocation('/farmer/profile')
+                ->assertSee('Anda harus menyelesaikan verifikasi terlebih dahulu');
+        });
+    }
 }
