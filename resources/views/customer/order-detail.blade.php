@@ -227,17 +227,18 @@
                         </form>
                 @endif
 
-                {{-- Cancel Order (pending) awaiting payment--}} 
+                {{-- Cancel Order button--}} 
                 @if($transaction->status === 'pending')
                     <form method="POST" action="{{ route('customer.orders.cancel', $transaction->transaction_id) }}"
                         onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.')">
                         @csrf
                         <button type="submit"
+                                dusk="cancel-order-button"
                                 class="w-full flex items-center justify-center gap-2 py-3 px-6 border-2 border-red-300 text-red-600 text-sm font-semibold rounded-2xl hover:bg-red-50 hover:border-red-400 transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
-                            Cancel Order
+                            Cancel Order 
                         </button>
                     </form>
                 @endif

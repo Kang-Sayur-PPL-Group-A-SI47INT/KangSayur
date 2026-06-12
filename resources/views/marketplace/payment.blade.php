@@ -128,6 +128,7 @@
                 @foreach($methods as $method)
                     <div @click="selected = '{{ $method['id'] }}'"
                          :class="selected === '{{ $method['id'] }}' ? 'border-green-500 bg-green-50 ring-2 ring-green-100' : 'border-gray-200 hover:border-green-300'"
+                         dusk = "{{ $method['id'] }}-method-btn"
                          class="p-3 border-2 rounded-xl text-center cursor-pointer transition-all duration-200">
                         <span class="text-2xl block mb-1">{{ $method['icon'] }}</span>
                         <span class="text-xs font-semibold text-gray-700">{{ $method['name'] }}</span>
@@ -190,7 +191,9 @@
             <input type="hidden" id="selected-bank" :value="selectedBank">
 
             {{-- Pay Button --}}
-            <button id="pay-button" @click="
+            <button id="pay-button" 
+                    dusk="confirm-pay-btn"
+                    @click="
                     if (loading) return;
                     loading = true;
                     handlePay(selected, selectedBank, $el)
@@ -258,6 +261,7 @@
                             <p class="text-xs text-gray-500 mb-4">Use your e-wallet app to scan</p>
                             <template x-if="resultData?.actions">
                                 <img :src="resultData.actions.find(a => a.name === 'generate-qr-code')?.url"
+                                dusk="qris-qr-image"
                                      class="w-48 h-48 mx-auto rounded-xl border border-gray-100 mb-4" alt="QR Code">
                             </template>
                         </div>
@@ -294,6 +298,7 @@
                     onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.')">
                     @csrf
                     <button type="submit"
+                            dusk="cancel-order-button"
                             class="inline-flex items-center gap-2 px-6 py-2.5 border-2 border-red-300 text-red-600 text-sm font-semibold rounded-full hover:bg-red-50 hover:border-red-400 transition-all duration-200">
                         <svg class="w-4 h-4" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>

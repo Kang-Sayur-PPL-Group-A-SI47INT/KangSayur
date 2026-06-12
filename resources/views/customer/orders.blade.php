@@ -71,7 +71,7 @@
                     {{-- Continue Payment --}}
                     @if($order->status === 'pending')
                         <a href="{{ route('customer.checkout.payment',$order->transaction_id) }}"
-                            class="flex-1 text-center py-2 px-4 text-sm font-semibold text-white bg-green-700 rounded-xl hover:bg-green-800 transition-all duration-200">
+                            class="flex-1 text-center py-2 px-4 text-sm font-semibold text-white bg-green-700 rounded-xl hover:bg-green-800 transition-all duration-200" dusk="continue-payment-button">
                             Continue Payment
                         </a>
                     @endif
@@ -80,10 +80,11 @@
                     @if($order->status === 'pending')
                     <form method="POST"
                         action="{{ route('customer.orders.cancel', $order->transaction_id) }}"
-                        onsubmit="return confirm('Are you sure you want to cancel this order?')"
+                        onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.')"
                         class="flex-1">
                         @csrf
                         <button type="submit"
+                                dusk="cancel-order-button"
                                 class="w-full py-2 px-4 text-sm font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 hover:border-red-300 transition-all duration-200 flex items-center justify-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
