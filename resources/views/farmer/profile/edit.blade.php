@@ -117,7 +117,7 @@
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <input type="text" id="farmer-map-search" placeholder="Cari alamat atau nama tempat..."
+                        <input type="text" name="farmer-mapp-search" id="farmer-map-search" placeholder="Cari alamat atau nama tempat..."
                             class="w-full pl-10 pr-24 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none text-sm">
                         <button type="button" id="farmer-geolocate-btn"
                             class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1">
