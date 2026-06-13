@@ -1,14 +1,19 @@
 <?php
 
+require __DIR__.'/auth.php';
+
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Customer\MarketplaceController;
 use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
+use App\Http\Controllers\Customer\RatingController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
 use App\Http\Controllers\Admin;
+
 Route::get('/', function () {
     $featuredListings = collect();
     // Only query if the listings table exists
@@ -26,10 +31,14 @@ Route::get('/farmer/dashboard', function () {
     return view('farmer.dashboard');
 })->middleware('auth')->name('farmer.dashboard');
 
-require __DIR__.'/auth.php';
+// Public farmer profile
+Route::get('/farmer/profile/{userId}', [Farmer\ProfileController::class, 'show'])->name('farmer.profile.show');
+
+
+Route::get('/average-price/{produce_id}', [ListingController::class, 'getAveragePrice']);
 
 Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->group(function () {
-   
+
     // Profile & Dashboard (accessible without verification)
     Route::get('/dashboard', [Farmer\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [Farmer\ProfileController::class, 'edit'])->name('profile.edit');
@@ -50,11 +59,19 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
         Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
         Route::post('/orders/{id}/shipping-proof', [Farmer\OrderController::class, 'uploadShippingProof'])->name('orders.uploadShippingProof');
         Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
+
+        // Harvest Calendar
+        Route::get('/harvest-calendar', [Farmer\HarvestScheduleController::class, 'index'])->name('harvest-calendar.index');
+        Route::post('/harvest-schedules', [Farmer\HarvestScheduleController::class, 'store'])->name('harvest-schedules.store');
+        Route::put('/harvest-schedules/{harvestSchedule}', [Farmer\HarvestScheduleController::class, 'update'])->name('harvest-schedules.update');
+        Route::delete('/harvest-schedules/{harvestSchedule}', [Farmer\HarvestScheduleController::class, 'destroy'])->name('harvest-schedules.destroy');
     });
 });
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace', [Customer\MarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/marketplace/{listing}', [Customer\MarketplaceController::class, 'show'])->name('marketplace.show');
+
+    Route::get('/farmer/{id}', [MarketplaceController::class, 'showFarmer'])->name('farmer.show');
 });
 // Shopping Cart routes
 Route::middleware(['auth'])->group(function () {
@@ -78,7 +95,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('customer.favorites');
     Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
 });
- 
+
+// Rating & Review routes (PBI 25-28)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+    Route::delete('/ratings/{rating}', [RatingController::class, 'destroy'])->name('ratings.destroy');
+    Route::get('/marketplace/{listing}/reviews', [RatingController::class, 'index'])->name('marketplace.reviews');
+});
+
 // customer orders
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     // Orders

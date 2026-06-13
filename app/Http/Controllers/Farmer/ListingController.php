@@ -93,17 +93,17 @@ class ListingController extends Controller
             'quantity' => 'required|numeric|min:0',
             'unit' => 'required|string|max:20',
             'produce_produce_id' => 'required|exists:produces,produce_id',
-            'status' => 'required|in:active,inactive,sold_out',
+            'status' => 'required|in:active,inactive',
             'availability_date' => 'nullable|date',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Enforce: cannot set active if quantity is 0
-        if ((int) $request->quantity <= 0 && $request->status === 'active') {
-            return back()->withInput()->with('error', 'Tidak dapat mengaktifkan listing dengan stok 0. Tambahkan stok terlebih dahulu.');
-        }
-
         $data = $request->only(['title', 'content', 'price', 'quantity', 'unit', 'produce_produce_id', 'status', 'availability_date']);
+
+        // Auto-set status to sold_out when quantity is 0
+        if ((int) $data['quantity'] <= 0) {
+            $data['status'] = 'sold_out';
+        }
 
         if ($request->hasFile('images')) {
             $paths = [];
@@ -129,6 +129,15 @@ class ListingController extends Controller
         $listing->delete();
 
         return redirect()->route('farmer.listings.index')->with('success', 'Listing deleted.');
+    }
+
+    public function getAveragePrice($produce_id)
+    {
+        $avg = Listing::getAveragePrice($produce_id);
+
+        return response()->json([
+            'average_price' => round($avg, 0)
+        ]);
     }
 
     private function authorize(Listing $listing): void

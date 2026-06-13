@@ -133,4 +133,17 @@ class User extends Authenticatable
     {
         return $this->cart ?? Cart::create(['user_user_id' => $this->user_id]);
     }
+    public function calculateScore()
+    {
+        // average rating 
+        $avgRating = $this->averageRating() ?? 0;
+
+        // total sales 
+        $totalSales = $this->transactions()->count();
+
+        // simple weighted formula
+        $score = ($avgRating * 0.7) + ($totalSales * 0.3);
+
+        return round($score, 2);
+    }
 }

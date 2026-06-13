@@ -71,6 +71,12 @@ class Transaction extends Model
         return $this->hasMany(TransactionItem::class, 'transaction_transaction_id', 'transaction_id');
     }
 
+    
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class, 'transaction_transaction_id', 'transaction_id');
+    }
+
     /**
      * Get grand total (items + delivery).
      */
@@ -185,5 +191,5 @@ class Transaction extends Model
         };
     }
 
-    
+
 }

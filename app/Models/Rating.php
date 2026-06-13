@@ -16,6 +16,7 @@ class Rating extends Model
         'comment',
         'listing_listing_id',
         'user_user_id',
+        'transaction_transaction_id',
     ];
 
     /**
@@ -32,5 +33,11 @@ class Rating extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_user_id', 'user_id');
+    }
+
+
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class, 'transaction_transaction_id', 'transaction_id');
     }
 }

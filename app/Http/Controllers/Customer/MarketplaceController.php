@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Models\Produce;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -28,7 +29,7 @@ class MarketplaceController extends Controller
         // Category filter
         if ($request->filled('category')) {
             $query->whereHas('produce', fn($q) => $q->where('category', $request->category));
-        } 
+        }
 
         // Price range
         if ($request->filled('min_price')) {
@@ -45,8 +46,8 @@ class MarketplaceController extends Controller
 
         // Rating filter
         if ($request->filled('min_rating')) {
-            $query->withAvg('ratings', 'score')
-                ->having('ratings_avg_score', '>=', $request->min_rating);
+            $query->withAvg('ratings', 'rating')
+                ->having('ratings_avg_rating', '>=', $request->min_rating);
         }
 
         // Sort
@@ -65,9 +66,9 @@ class MarketplaceController extends Controller
             ->whereNotNull('city')
             ->distinct()
             ->pluck('city');
-        
 
-        
+
+
 
         return view('marketplace.index', compact('listings', 'categories', 'cities'));
     }
@@ -82,7 +83,28 @@ class MarketplaceController extends Controller
             ->take(4)
             ->get();
 
-        return view('marketplace.show', compact('listing', 'relatedListings'));
+        // Rating distribution for PBI 27
+        $totalReviews = $listing->ratings->count();
+        $distribution = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $count = $listing->ratings->where('score', $i)->count();
+            $distribution[$i] = [
+                'count'      => $count,
+                'percentage' => $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0,
+            ];
+        }
+
+        $averageRating = $totalReviews > 0 ? round($listing->ratings->avg('score'), 1) : 0;
+
+        // Current user's existing review (for PBI 28 delete)
+        $userRating = null;
+        if (auth()->check()) {
+            $userRating = $listing->ratings->where('user_user_id', auth()->user()->user_id)->first();
+        }
+
+        return view('marketplace.show', compact(
+            'listing', 'relatedListings', 'distribution', 'averageRating', 'totalReviews', 'userRating'
+        ));
     }
 
     public function showFarmer($id): View
@@ -102,7 +124,7 @@ class MarketplaceController extends Controller
 
         return view('farmer.profile.show', compact('farmer', 'score'));
     }
-    
+
     private function sortByNearest($query)
     {
         $user = auth()->user();
