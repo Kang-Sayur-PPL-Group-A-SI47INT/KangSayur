@@ -9,6 +9,7 @@ use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
+use App\Http\Controllers\Customer\RatingController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
 use App\Http\Controllers\Admin;
@@ -91,6 +92,13 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('customer.favorites');
     Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
+});
+
+// Rating & Review routes (PBI 25-28)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+    Route::delete('/ratings/{rating}', [RatingController::class, 'destroy'])->name('ratings.destroy');
+    Route::get('/marketplace/{listing}/reviews', [RatingController::class, 'index'])->name('marketplace.reviews');
 });
 
 // customer orders

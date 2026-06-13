@@ -189,6 +189,15 @@ class CheckoutController extends Controller
             abort(403);
         }
         $transaction->load(['items.listing.farmer', 'items.listing.produce']);
-        return view('customer.order-detail', compact('transaction'));
+
+        // Load existing ratings by this user for listings in this transaction
+        $user = auth()->user();
+        $listingIds = $transaction->items->pluck('listing_listing_id')->filter()->toArray();
+        $existingRatings = \App\Models\Rating::where('user_user_id', $user->user_id)
+            ->whereIn('listing_listing_id', $listingIds)
+            ->get()
+            ->keyBy('listing_listing_id');
+
+        return view('customer.order-detail', compact('transaction', 'existingRatings'));
     }
 }
