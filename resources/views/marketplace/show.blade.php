@@ -80,6 +80,16 @@
                             🛒 Add to Cart
                         </button>
                     </form>
+
+                    <!-- Make an Offer (Bargain) -->
+                    <form method="POST" action="{{ route('customer.offers.store', $listing) }}" class="flex gap-3 mb-4">
+                        @csrf
+                        <input type="number" name="offered_price" placeholder="Your price (Rp)" min="1" required
+                            class="w-40 px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 text-center font-semibold">
+                        <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition-all shadow-lg shadow-blue-200/50">
+                            💬 Make an Offer
+                        </button>
+                    </form>
                 @endif
 
 

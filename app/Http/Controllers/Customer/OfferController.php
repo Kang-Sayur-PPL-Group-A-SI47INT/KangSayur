@@ -110,4 +110,51 @@ class OfferController extends Controller
 
         return back()->with('success', 'Counter offer accepted!');
     }
+
+    public function update(Request $request, Offer $offer): RedirectResponse
+    {
+        if ($offer->user_user_id !== auth()->user()->user_id) {
+            abort(403);
+        }
+
+        if (!in_array($offer->status, ['pending', 'countered'])) {
+            return back()->with('error', 'You can only update a pending or countered offer.');
+        }
+
+        $request->validate([
+            'offered_price' => 'required|numeric|min:1',
+        ]);
+
+        $oldPrice = $offer->offered_price;
+        $offer->update([
+            'offered_price' => $request->offered_price,
+            'counter_price' => null,
+            'status' => 'pending',
+        ]);
+
+        Message::create([
+            'content' => 'Offer updated from Rp ' . number_format($oldPrice, 0, ',', '.') . ' to Rp ' . number_format($request->offered_price, 0, ',', '.'),
+            'sender_user_id' => auth()->user()->user_id,
+            'receiver_user_id' => $offer->listing->user_user_id,
+            'user_user_id' => auth()->user()->user_id,
+            'offer_offer_id' => $offer->offer_id,
+        ]);
+
+        return back()->with('success', 'Offer updated successfully!');
+    }
+
+    public function destroy(Offer $offer): RedirectResponse
+    {
+        if ($offer->user_user_id !== auth()->user()->user_id) {
+            abort(403);
+        }
+
+        if (!in_array($offer->status, ['pending', 'countered'])) {
+            return back()->with('error', 'You can only withdraw a pending or countered offer.');
+        }
+
+        $offer->delete();
+
+        return redirect()->route('customer.offers')->with('success', 'Offer withdrawn successfully.');
+    }
 }
