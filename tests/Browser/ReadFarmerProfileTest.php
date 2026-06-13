@@ -94,4 +94,65 @@ class ReadFarmerProfileTest extends DuskTestCase
             ;
         });
     }
+
+    /**
+     * Test customer cannot view nonexistent farmer profile.
+     */
+    public function test_customer_cannot_view_nonexistent_farmer_profile(): void
+    {
+        $customer = User::factory()->create([
+            'role' => 'customer',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($customer) {
+            $browser->loginAs($customer)
+                ->visit('/farmer/profile/99999')
+                ->pause(1000)
+                ->assertSee('404')
+            ;
+        });
+    }
+
+    /**
+     * Test customer cannot view a customer user as farmer profile.
+     */
+    public function test_customer_cannot_view_customer_as_farmer_profile(): void
+    {
+        $customerTarget = User::factory()->create([
+            'role' => 'customer',
+            'name' => 'Not A Farmer',
+        ]);
+
+        $customer = User::factory()->create([
+            'role' => 'customer',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($customer, $customerTarget) {
+            $browser->loginAs($customer)
+                ->visit('/farmer/profile/' . $customerTarget->user_id)
+                ->pause(1000)
+                ->assertSee('404')
+            ;
+        });
+    }
+
+    /**
+     * Test unauthenticated user can view public farmer profile.
+     */
+    public function test_unauthenticated_user_can_view_public_farmer_profile(): void
+    {
+        $farmer = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified',
+            'name' => 'Pak Tani Public',
+            'is_public_profile' => true,
+        ]);
+
+        $this->browse(function (Browser $browser) use ($farmer) {
+            $browser->visit('/farmer/profile/' . $farmer->user_id)
+                ->pause(1000)
+                ->assertSee('Pak Tani Public')
+            ;
+        });
+    }
 }

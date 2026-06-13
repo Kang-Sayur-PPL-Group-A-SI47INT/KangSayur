@@ -77,4 +77,137 @@ class CreateListingTest extends DuskTestCase
 
         });
     }
+
+    /**
+     * Test create listing fails without title.
+     */
+    public function test_create_listing_without_title(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
+        ]);
+
+        $produce = Produce::create([
+            'name' => 'Kangkung',
+            'category' => 'Vegetables'
+        ]);
+
+        $this->browse(function ($browser) use ($user, $produce): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/listings/create')
+                ->assertPathIs('/farmer/listings/create')
+                ->select('produce_produce_id', $produce->produce_id)
+                ->type('title', '')
+                ->type('price', '12000')
+                ->type('quantity', '25')
+                ->select('unit', 'kg')
+                ->type('content', 'Test content')
+                ->press('Publish Listing')
+                ->pause(1000)
+                ->assertPathIs('/farmer/listings/create')
+            ;
+        });
+    }
+
+    /**
+     * Test create listing fails with negative price.
+     */
+    public function test_create_listing_with_negative_price(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
+        ]);
+
+        $produce = Produce::create([
+            'name' => 'Sawi',
+            'category' => 'Vegetables'
+        ]);
+
+        $this->browse(function ($browser) use ($user, $produce): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/listings/create')
+                ->assertPathIs('/farmer/listings/create')
+                ->select('produce_produce_id', $produce->produce_id)
+                ->type('title', 'Negative Price Test')
+                ->type('price', '-100')
+                ->type('quantity', '25')
+                ->select('unit', 'kg')
+                ->type('content', 'Test content')
+                ->press('Publish Listing')
+                ->pause(1000)
+                ->assertPathIs('/farmer/listings/create')
+            ;
+        });
+    }
+
+    /**
+     * Test create listing fails with zero quantity.
+     */
+    public function test_create_listing_with_zero_quantity(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
+        ]);
+
+        $produce = Produce::create([
+            'name' => 'Tomat',
+            'category' => 'Vegetables'
+        ]);
+
+        $this->browse(function ($browser) use ($user, $produce): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/listings/create')
+                ->assertPathIs('/farmer/listings/create')
+                ->select('produce_produce_id', $produce->produce_id)
+                ->type('title', 'Zero Quantity Test')
+                ->type('price', '12000')
+                ->type('quantity', '0')
+                ->select('unit', 'kg')
+                ->type('content', 'Test content')
+                ->press('Publish Listing')
+                ->pause(1000)
+                ->assertPathIs('/farmer/listings/create')
+            ;
+        });
+    }
+
+    /**
+     * Test unverified farmer cannot create listing.
+     */
+    public function test_unverified_farmer_cannot_create_listing(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'unverified'
+        ]);
+
+        $this->browse(function ($browser) use ($user): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/listings/create')
+                ->pause(1000)
+                ->assertPathIs('/farmer/profile')
+            ;
+        });
+    }
+
+    /**
+     * Test customer cannot access create listing page.
+     */
+    public function test_customer_cannot_access_create_listing(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'customer'
+        ]);
+
+        $this->browse(function ($browser) use ($user): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/listings/create')
+                ->pause(1000)
+                ->assertSee('403')
+            ;
+        });
+    }
 }

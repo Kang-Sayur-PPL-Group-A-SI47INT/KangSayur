@@ -72,7 +72,7 @@
             {{-- Recent Transactions --}}
             <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-900">💰 Transaksi Terbaru</h2>
+                    <h2 class="text-lg font-bold text-gray-900">📦 Order Terbaru</h2>
                     <a href="{{ route('admin.transactions.index') }}" class="text-sm text-green-700 hover:text-green-800 font-medium">Lihat Semua →</a>
                 </div>
                 @forelse($recentTransactions as $tx)

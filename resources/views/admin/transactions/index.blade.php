@@ -1,10 +1,10 @@
 <x-admin-layout>
-    @php $title = 'Transaksi'; @endphp
+    @php $title = 'Order'; @endphp
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Kelola Transaksi 💰</h1>
-                <p class="text-gray-500 mt-1">Kelola semua transaksi dan status pengiriman</p>
+                <h1 class="text-2xl font-bold text-gray-900">Kelola Order 📦</h1>
+                <p class="text-gray-500 mt-1">Kelola semua order dan verifikasi bukti pengiriman</p>
             </div>
         </div>
         <form method="GET" class="flex gap-3 mb-6">
@@ -26,6 +26,7 @@
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Pelanggan</th>
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Total</th>
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Bukti Kirim</th>
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
                         <th class="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Aksi</th>
                     </tr>
@@ -50,32 +51,63 @@
                                 <span class="px-2 py-1 text-xs rounded-full border {{ $statusBadge }}">
                                     {{ ucfirst($tx->status) }}
                                 </span>
+                                @if($tx->status === 'paid' && !$tx->hasShippingProof() && $tx->paid_status_at)
+                                    @php
+                                        $deadline = $tx->shippingProofDeadline();
+                                        $isOverdue = $tx->isShippingProofOverdue();
+                                    @endphp
+                                    <span class="block mt-1 text-xs {{ $isOverdue ? 'text-red-500 font-semibold' : 'text-amber-500' }}">
+                                        @if($isOverdue)
+                                            ⚠️ Bukti terlambat!
+                                        @else
+                                            ⏰ Deadline: {{ $deadline->format('d M H:i') }}
+                                        @endif
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($tx->hasShippingProof())
+                                    <div x-data="{ showProof: false }" class="relative">
+                                        <button @click="showProof = !showProof" class="px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors">
+                                            📷 Lihat Bukti
+                                        </button>
+                                        <div x-show="showProof" @click.away="showProof = false" x-transition
+                                             class="absolute z-50 mt-2 left-0 bg-white rounded-xl shadow-xl border border-gray-200 p-3 w-64">
+                                            <img src="{{ asset('storage/' . $tx->shipping_proof) }}" alt="Bukti Pengiriman" class="w-full rounded-lg">
+                                            <p class="text-xs text-gray-500 mt-2">Diupload: {{ $tx->shipping_proof_uploaded_at?->format('d M Y H:i') }}</p>
+                                        </div>
+                                    </div>
+                                @else
+                                    <span class="text-gray-300 text-xs">—</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-gray-500 text-sm">{{ $tx->created_at->format('d M Y H:i') }}</td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    {{-- Status progression: paid → shipping → delivered --}}
-                                    @if($tx->status === 'paid')
+                                    {{-- Verify shipping proof → mark as delivered --}}
+                                    @if($tx->status === 'shipping' && $tx->hasShippingProof())
+                                        <form method="POST" action="{{ route('admin.transactions.verifyProof', $tx) }}">
+                                            @csrf
+                                            <button class="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors">
+                                                ✅ Verifikasi & Selesaikan
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    {{-- Status progression: paid → shipping (only if proof exists) --}}
+                                    @if($tx->status === 'paid' && $tx->hasShippingProof())
                                         <form method="POST" action="{{ route('admin.transactions.updateStatus', $tx) }}">
                                             @csrf
                                             <input type="hidden" name="status" value="shipping">
                                             <button class="px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-xs font-medium hover:bg-purple-100 transition-colors">
-                                                🚚 Kirim
+                                                🚚 Konfirmasi Kirim
                                             </button>
                                         </form>
                                     @endif
-                                    @if($tx->status === 'shipping')
-                                        <form method="POST" action="{{ route('admin.transactions.updateStatus', $tx) }}">
-                                            @csrf
-                                            <input type="hidden" name="status" value="delivered">
-                                            <button class="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors">
-                                                ✅ Selesai
-                                            </button>
-                                        </form>
-                                    @endif
-                                    {{-- Cancel (only for pending/paid) --}}
-                                    @if(in_array($tx->status, ['pending', 'paid']))
-                                        <form method="POST" action="{{ route('admin.transactions.cancel', $tx) }}" onsubmit="return confirm('Yakin batalkan transaksi?')">
+
+                                    {{-- Cancel (only for pending/paid, NOT shipping/delivered) --}}
+                                    @if($tx->canBeCancelled())
+                                        <form method="POST" action="{{ route('admin.transactions.cancel', $tx) }}" onsubmit="return confirm('Yakin batalkan order ini?')">
                                             @csrf
                                             <button class="px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors">
                                                 ❌ Batalkan
@@ -86,7 +118,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="text-center py-8 text-gray-400">Tidak ada transaksi.</td></tr>
+                        <tr><td colspan="7" class="text-center py-8 text-gray-400">Tidak ada order.</td></tr>
                     @endforelse
                 </tbody>
             </table>

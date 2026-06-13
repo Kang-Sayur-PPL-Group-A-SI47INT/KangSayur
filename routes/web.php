@@ -57,6 +57,7 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
         // Orders
         Route::get('/orders', [Farmer\OrderController::class, 'index'])->name('orders.index');
         Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::post('/orders/{id}/shipping-proof', [Farmer\OrderController::class, 'uploadShippingProof'])->name('orders.uploadShippingProof');
         Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
 
         // Harvest Calendar
@@ -87,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/checkout/payment/{transaction}/simulate', [CheckoutController::class, 'simulatePayment'])->name('customer.checkout.simulate');
     Route::get('/orders', [CheckoutController::class, 'orders'])->name('customer.orders');
     Route::get('/orders/{transaction}', [CheckoutController::class, 'orderDetail'])->name('customer.orders.detail');
+    Route::post('/orders/{transaction}/cancel', [CheckoutController::class, 'cancelOrder'])->name('customer.orders.cancel');
 });
 // Favorites routes
 Route::middleware(['auth'])->group(function () {
@@ -114,11 +116,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/verifications/{user}', [Admin\FarmerVerificationController::class, 'show'])->name('verifications.show');
     Route::post('/verifications/{user}/approve', [Admin\FarmerVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [Admin\FarmerVerificationController::class, 'reject'])->name('verifications.reject');
-    // Transaction Management
+    // Order Management (renamed from Transaction)
     Route::get('/transactions', [Admin\TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions/{transaction}/status', [Admin\TransactionController::class, 'updateStatus'])->name('transactions.updateStatus');
     Route::post('/transactions/{transaction}/cancel', [Admin\TransactionController::class, 'cancel'])->name('transactions.cancel');
+    Route::post('/transactions/{transaction}/verify-proof', [Admin\TransactionController::class, 'verifyShippingProof'])->name('transactions.verifyProof');
     // User & Listing Management
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/listings', [Admin\ListingController::class, 'index'])->name('listings.index');
+    Route::post('/users/{user}/ban', [Admin\UserController::class, 'ban'])->name('users.ban');
+    Route::post('/users/{user}/unban', [Admin\UserController::class, 'unban'])->name('users.unban');
+    Route::delete('/listings/{listing}', [Admin\ListingController::class, 'destroy'])->name('listings.destroy');
 });

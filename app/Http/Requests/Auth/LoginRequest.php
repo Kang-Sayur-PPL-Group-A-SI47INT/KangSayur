@@ -50,6 +50,14 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        $user = Auth::user();
+        if ($user && $user->is_banned) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah diblokir oleh admin. Alasan: ' . ($user->ban_reason ?? 'Pelanggaran ketentuan'),
+            ]);
+        }
     }
 
     /**

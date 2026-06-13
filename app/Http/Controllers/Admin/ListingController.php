@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+
 class ListingController extends Controller
 {
     public function index(Request $request): View
@@ -17,5 +20,11 @@ class ListingController extends Controller
         }
         $listings = $query->orderBy('created_at', 'desc')->paginate(15);
         return view('admin.listings.index', compact('listings'));
+    }
+
+    public function destroy(Listing $listing)
+    {
+        $listing->update(['status' => 'inactive']);
+        return back()->with('success', 'Listing berhasil dinonaktifkan.');
     }
 }
