@@ -97,6 +97,9 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     // Orders
     Route::get('/orders', [Customer\OrderController::class, 'index'])->name('orders');
+
+    // Harvest Calendar (read-only)
+    Route::get('/harvest-calendar', [Customer\HarvestCalendarController::class, 'index'])->name('harvest-calendar.index');
 });
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
