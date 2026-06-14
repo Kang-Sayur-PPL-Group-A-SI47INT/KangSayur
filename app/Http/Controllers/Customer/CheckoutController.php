@@ -243,22 +243,7 @@ class CheckoutController extends Controller
         return back()->with('success', 'Order berhasil dibatalkan.');
     }
 
-    //Cancel in checkout
 
-    public function cancelOrder(Transaction $transaction)
-    {
-        if ($transaction->user_user_id !== auth()->id()) {
-            abort(403); //checking if not user id
-        }
-
-        if (!in_array($transaction->status, ['pending'])) {
-            return back()->with('error', 'Only pending can be cancelled');
-        }
-
-        //update status to cancel
-       $transaction->update(['status' => 'cancelled']);
-        return redirect()->route('customer.orders')->with('success','Order has been cancelled');
-    }
 
     public function confirmDelivery(Transaction $transaction)
     {

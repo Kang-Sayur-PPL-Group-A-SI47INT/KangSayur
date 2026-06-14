@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="hidden lg:block">
-                        <img src="{{ asset('images/farmer-hero.png') }}" alt="Farmer in field" class="w-full h-96 object-cover rounded-br-3xl">
+                        <img src="{{ asset('images/farmer-hero.jpg') }}" alt="Farmer in field" class="w-full h-96 object-cover rounded-br-3xl">
                     </div>
                 </div>
             </div>

@@ -69,8 +69,11 @@ class MarketplaceController extends Controller
 
 
 
+        $wishlistIds = auth()->check() 
+            ? \App\Models\Wishlist::where('user_user_id', auth()->user()->user_id)->pluck('listing_listing_id')->toArray() 
+            : [];
 
-        return view('marketplace.index', compact('listings', 'categories', 'cities'));
+        return view('marketplace.index', compact('listings', 'categories', 'cities', 'wishlistIds'));
     }
 
     public function show(Listing $listing): View
@@ -98,13 +101,23 @@ class MarketplaceController extends Controller
 
         // Current user's existing review (for PBI 28 delete)
         $userRating = null;
+        $isWishlisted = false;
+        $deliveredTransaction = null;
         if (auth()->check()) {
             $userRating = $listing->ratings->where('user_user_id', auth()->user()->user_id)->first();
+            $isWishlisted = \App\Models\Wishlist::where('user_user_id', auth()->user()->user_id)
+                ->where('listing_listing_id', $listing->listing_id)->exists();
+            // Find a delivered transaction containing this listing (for rating)
+            $deliveredTransaction = \App\Models\Transaction::where('user_user_id', auth()->user()->user_id)
+                ->where('status', 'delivered')
+                ->whereHas('items', fn($q) => $q->where('listing_listing_id', $listing->listing_id))
+                ->first();
         }
 
         return view('marketplace.show', compact(
-            'listing', 'relatedListings', 'distribution', 'averageRating', 'totalReviews', 'userRating'
+            'listing', 'relatedListings', 'distribution', 'averageRating', 'totalReviews', 'userRating', 'isWishlisted', 'deliveredTransaction'
         ));
+
     }
 
     public function showFarmer($id): View

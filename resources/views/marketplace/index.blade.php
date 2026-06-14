@@ -13,7 +13,7 @@
                     <p class="text-gray-600 text-sm max-w-md">Browse fresh produce directly from local Indonesian farmers. Better prices, better quality.</p>
                 </div>
                 <div class="hidden lg:block">
-                    <img src="{{ asset('images/farmer-hero.png') }}" alt="Farm" class="w-full h-56 object-cover rounded-br-3xl">
+                    <img src="{{ asset('images/farmer-hero.jpg') }}" alt="Farm" class="w-full h-56 object-cover rounded-br-3xl">
                 </div>
             </div>
         </div>
@@ -120,10 +120,7 @@
                                                 <span class="text-7xl group-hover:scale-110 transition-transform duration-500">{{ $emoji }}</span>
                                             </div>
                                         @endif
-                                        @if($listing->created_at->diffInDays(now()) < 3)
-                                            <span class="absolute top-3 left-3 px-2.5 py-1 bg-green-600 text-white rounded-full text-xs font-semibold">New</span>
-                                        @endif
-                                        <span class="absolute top-3 right-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
+                                        <span class="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700 max-w-[100px] truncate" title="{{ $listing->produce->category ?? '' }}">{{ $listing->produce->category ?? '' }}</span>
                                     </div>
                                         <div class="p-4">
                                         <h3 class="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-green-700 transition-colors line-clamp-1">{{ $listing->title }}</h3>
@@ -145,17 +142,14 @@
                                         </div>
                                     </div>
                                 </a>
-                                <!-- Wishlist -->
-                                <form method="POST" action="{{ route('customer.favorites.toggle', $listing) }}" class="absolute top-3 right-14 z-10">
-                                    @csrf
-                                    <button class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-sm">
-                                        @if(in_array($listing->listing_id, $wishlistIds ?? []))
-                                            <span class="text-red-500">❤️</span>
-                                        @else
-                                            <span class="text-gray-400">🤍</span>
-                                        @endif
-                                    </button>
-                                </form>
+                                <!-- Wishlist Button -->
+                                <button type="submit" form="wishlist-form-{{ $listing->listing_id }}" dusk="add-to-favorite" class="absolute top-3 right-3 z-10 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-sm">
+                                    @if(in_array($listing->listing_id, $wishlistIds ?? []))
+                                        <span class="text-red-500">❤️</span>
+                                    @else
+                                        <span class="text-gray-400">🤍</span>
+                                    @endif
+                                </button>
                             </div>
                         @empty
                             <div class="col-span-full text-center py-20">
@@ -172,4 +166,11 @@
             </div>
         </form>
     </div>
+
+    <!-- Hidden Wishlist Forms -->
+    @foreach($listings as $listing)
+        <form id="wishlist-form-{{ $listing->listing_id }}" method="POST" action="{{ route('customer.favorites.toggle', $listing) }}" class="hidden">
+            @csrf
+        </form>
+    @endforeach
 </x-app-layout>

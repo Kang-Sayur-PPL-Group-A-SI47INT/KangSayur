@@ -37,7 +37,7 @@
                                     </a>
                                     @if(auth()->user()->isCustomer())
                                         <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
-                                            Negotiations
+                                            Offers
                                         </a>
                                         <a href="{{ route('customer.favorites') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.favorites') ? 'nav-link-active' : 'nav-link' }}">
                                             Favorites
@@ -53,7 +53,7 @@
                                             My Produce
                                         </a>
                                         <a href="{{ route('farmer.offers.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
-                                            Negotiations
+                                            Offers
                                         </a>
                                         <a href="{{ route('farmer.orders.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.orders*') ? 'nav-link-active' : 'nav-link' }}">
                                             Orders
@@ -116,11 +116,13 @@
                                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Admin Dashboard</a>
                                         @elseif(auth()->user()->isFarmer())
                                             <a href="{{ route('farmer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
+                                            <a href="{{ route('farmer.harvest-calendar.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Harvest Calendar</a>
                                             <a href="{{ route('farmer.profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
                                         @else
-                                            <a href="{{ route('customer.offers') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Negotiations</a>
+                                            <a href="{{ route('customer.offers') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Offers</a>
                                             <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Orders</a>
                                             <a href="{{ route('customer.favorites') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Favorites</a>
+                                            <a href="{{ route('customer.harvest-calendar.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Harvest Calendar</a>
                                         @endif
                                         <div class="border-t border-gray-100 mt-1 pt-1">
                                             <form method="POST" action="{{ route('logout') }}">
