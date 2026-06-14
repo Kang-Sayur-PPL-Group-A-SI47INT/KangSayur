@@ -20,10 +20,10 @@
                             Connecting you directly to Indonesian local farmers. Fresher produce, fairer prices, and a more sustainable community.
                         </p>
                         <div class="flex flex-wrap gap-3">
-                            <a href="#" class="px-8 py-4 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all duration-300 shadow-lg shadow-green-200/50">
-                                Start Shopping 
+                            <a href="{{ route('register') }}" class="px-8 py-4 bg-green-800 text-white font-bold rounded-full hover:bg-green-900 transition-all duration-300 shadow-lg shadow-green-200/50">
+                                Start Shopping →
                             </a>
-                            <a href="#" class="px-8 py-4 bg-white text-green-800 font-semibold rounded-full border border-green-200 hover:bg-green-50 transition-all duration-300">
+                            <a href="{{ route('register') }}" class="px-8 py-4 bg-white text-green-800 font-semibold rounded-full border border-green-200 hover:bg-green-50 transition-all duration-300">
                                 Sell Your Harvest
                             </a>
                         </div>
@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="hidden lg:block">
-                        <img src="{{ asset('images/farmer-hero.jpg') }}" alt="Farmer in field" class="w-full h-96 object-cover rounded-br-3xl">
+                        <img src="{{ asset('images/farmer-hero.png') }}" alt="Farmer in field" class="w-full h-96 object-cover rounded-br-3xl">
                     </div>
                 </div>
             </div>
@@ -55,13 +55,14 @@
                     <p class="text-gray-500 leading-relaxed">No middlemen. Produce shipped directly from the farm to your doorstep at fair prices.</p>
                 </div>
                 <div class="group p-8 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-amber-100/50 transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🌾</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Farm Fresh Quality</h3>
-                    <p class="text-gray-500 leading-relaxed">Browse verified produce with detailed listings, farmer profiles, and community reviews you can trust.</p>
+                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">💰</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Price Negotiation</h3>
+                    <p class="text-gray-500 leading-relaxed">Make offers directly to farmers. A transparent and fair negotiation system for everyone.</p>
                 </div>
                 <div class="group p-8 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 hover:-translate-y-1">
                     <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">🔒</div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Secure Payment</h3>
+                    <p class="text-gray-500 leading-relaxed">Integrated with Midtrans for safe payments. Multiple payment methods available.</p>
                 </div>
             </div>
         </div>
@@ -76,17 +77,17 @@
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Picked This Morning</p>
                     <h2 class="text-3xl font-bold text-gray-900">Featured <span class="text-green-700">Produce</span></h2>
                 </div>
-                <a href="{#" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors">
+                <a href="{{ route('login') }}" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors">
                     View All
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
             </div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach($featuredListings as $listing)
-                <a href="#" class="product-card group">
+                <a href="{{ route('login') }}" class="product-card group">
                     <div class="aspect-square bg-cream-100 relative overflow-hidden">
                         @if($listing->image)
-                            <img src="#" alt="{{ $listing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <img src="{{ asset('storage/' . $listing->image) }}" alt="{{ $listing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
                             @php
                                 $emojis = ['🍅', '🌶️', '🥬', '🥦', '🥕', '🌽', '🧅', '🍆', '🥔', '🧄'];
@@ -102,7 +103,15 @@
                         <h3 class="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-green-700 transition-colors">{{ $listing->title }}</h3>
                         <p class="text-xs text-gray-400 mb-2">{{ $listing->farmer->name ?? 'Farmer' }} · {{ $listing->farmer->city ?? '' }}</p>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm font-bold text-green-800">Rp {{ number_format($listing->price, 0, ',', '.') }} <span class="text-xs text-gray-400 font-normal">/kg</span></span>
+                            <div>
+                                @if($listing->hasDiscount())
+                                    <span class="text-xs text-gray-400 line-through">Rp {{ number_format($listing->price, 0, ',', '.') }}</span>
+                                    <span class="text-sm font-bold text-green-800">Rp {{ number_format($listing->effectivePrice(), 0, ',', '.') }} <span class="text-xs text-gray-400 font-normal">/{{ $listing->unit ?? 'kg' }}</span></span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 ml-1">🏷️ {{ $listing->formattedDiscount() }}</span>
+                                @else
+                                    <span class="text-sm font-bold text-green-800">Rp {{ number_format($listing->price, 0, ',', '.') }} <span class="text-xs text-gray-400 font-normal">/{{ $listing->unit ?? 'kg' }}</span></span>
+                                @endif
+                            </div>
                             <div class="flex items-center gap-0.5 text-xs">
                                 <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                 <span class="font-semibold text-gray-600">{{ number_format($listing->averageRating() ?? 0, 1) }}</span>
@@ -125,13 +134,12 @@
                 </div>
                 <div class="relative">
                     <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4 font-serif">Ready to Get Started?</h2>
-                    <p class="text-green-200 mb-8 max-w-lg mx-auto">Join local farmers and and enjoy the benefits of Kang Sayur.</p>
-                    <a href="#" class="inline-flex px-8 py-4 bg-white text-green-800 font-bold rounded-full hover:bg-green-50 transition-all duration-300 shadow-xl">
-                        Sign Up Now! 
+                    <p class="text-green-200 mb-8 max-w-lg mx-auto">Join thousands of farmers and consumers already enjoying the benefits of Kang Sayur.</p>
+                    <a href="{{ route('register') }}" class="inline-flex px-8 py-4 bg-white text-green-800 font-bold rounded-full hover:bg-green-50 transition-all duration-300 shadow-xl">
+                        Sign Up Now — It's Free! →
                     </a>
                 </div>
             </div>
         </div>
     </section>
 </x-app-layout>
-

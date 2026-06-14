@@ -8,6 +8,10 @@ class Listing extends Model
         'title',
         'content',
         'price',
+        'discount_percentage',
+        'original_price',
+        'auto_discount',
+        'discount_expires_at',
         'quantity',
         'unit',
         'status',
@@ -20,6 +24,8 @@ class Listing extends Model
     {
         return [
             'availability_date' => 'date',
+            'auto_discount' => 'boolean',
+            'discount_expires_at' => 'datetime',
         ];
     }
     /**
@@ -86,6 +92,31 @@ class Listing extends Model
     public function harvestSchedules()
     {
         return $this->hasMany(HarvestSchedule::class, 'listing_id', 'listing_id');
+    }
+
+    public function stockLogs()
+    {
+        return $this->hasMany(ListingStockLog::class, 'listing_id', 'listing_id');
+    }
+
+    public function effectivePrice(): float
+    {
+        if ($this->hasDiscount()) {
+            $discount = (float) $this->price * ((float) $this->discount_percentage / 100);
+            return (float) $this->price - $discount;
+        }
+
+        return (float) $this->price;
+    }
+
+    public function hasDiscount(): bool
+    {
+        return $this->discount_percentage > 0;
+    }
+
+    public function formattedDiscount(): string
+    {
+        return number_format($this->discount_percentage, 0) . '%';
     }
     /**
      * Check if listing has active (pending/paid) orders.

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Farmer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+use App\Models\ListingStockLog;
 use App\Models\Produce;
+use App\Services\HarvestDiscountService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -72,6 +74,13 @@ class ListingController extends Controller
 
         $listing = Listing::create($data);
 
+        // Log the initial stock
+        ListingStockLog::create([
+            'listing_id' => $listing->listing_id,
+            'quantity'   => $data['quantity'],
+            'source'     => 'manual',
+        ]);
+
         return redirect()->route('farmer.listings.index')->with('success', 'Listing created successfully!');
     }
 
@@ -114,6 +123,16 @@ class ListingController extends Controller
         }
 
         $listing->update($data);
+
+        // Log the stock change
+        ListingStockLog::create([
+            'listing_id' => $listing->listing_id,
+            'quantity'   => $data['quantity'],
+            'source'     => 'manual',
+        ]);
+
+        // Recalculate auto-discount in case the average changed
+        HarvestDiscountService::recalculateForListing($listing);
 
         return redirect()->route('farmer.listings.index')->with('success', 'Listing updated successfully!');
     }

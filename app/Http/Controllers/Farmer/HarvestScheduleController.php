@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Farmer;
 
 use App\Http\Controllers\Controller;
 use App\Models\HarvestSchedule;
+use App\Models\ListingStockLog;
+use App\Services\HarvestDiscountService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,6 +51,9 @@ class HarvestScheduleController extends Controller
         ]);
     }
 
+    /**
+     * Store a new harvest schedule.
+     */
     public function store(Request $request): RedirectResponse
     {
         $farmer = auth()->user();
@@ -64,6 +69,7 @@ class HarvestScheduleController extends Controller
             'estimated_stock'   => 'required|integer|min:1',
         ]);
 
+        // Check for duplicate
         $exists = HarvestSchedule::where('listing_id', $validated['listing_id'])
             ->where('availability_date', $validated['availability_date'])
             ->exists();
@@ -72,20 +78,41 @@ class HarvestScheduleController extends Controller
             return back()->withErrors(['availability_date' => 'A schedule already exists for this listing on the selected date.'])->withInput();
         }
 
-        HarvestSchedule::create($validated);
+        $schedule = HarvestSchedule::create($validated);
 
-        return back()->with('success', 'Harvest schedule created successfully!');
+        // Log the estimated stock as a data point
+        ListingStockLog::create([
+            'listing_id' => $validated['listing_id'],
+            'quantity'   => $validated['estimated_stock'],
+            'source'     => 'harvest_schedule',
+        ]);
+
+        // Auto-discount: calculate and apply if threshold is met
+        $listing  = $schedule->listing;
+        $discount = HarvestDiscountService::applyDiscount($listing, $schedule);
+
+        $message = 'Harvest schedule created successfully!';
+        if ($discount > 0) {
+            $message .= " 🏷️ {$discount}% auto-discount applied based on surplus stock.";
+        }
+
+        return back()->with('success', $message);
     }
 
+    /**
+     * Update an existing harvest schedule.
+     */
     public function update(Request $request, HarvestSchedule $harvestSchedule): RedirectResponse
     {
         $farmer = auth()->user();
         $farmerListingIds = $farmer->listings()->pluck('listing_id')->toArray();
 
+        // Verify ownership
         if (!in_array($harvestSchedule->listing_id, $farmerListingIds)) {
             abort(403);
         }
 
+        // Prevent editing past schedules
         if ($harvestSchedule->isPast()) {
             return back()->with('error', 'Cannot edit past harvest schedules.');
         }
@@ -100,6 +127,7 @@ class HarvestScheduleController extends Controller
             'estimated_stock'   => 'required|integer|min:1',
         ]);
 
+        // Check for duplicate (excluding current record)
         $exists = HarvestSchedule::where('listing_id', $validated['listing_id'])
             ->where('availability_date', $validated['availability_date'])
             ->where('id', '!=', $harvestSchedule->id)
@@ -111,23 +139,48 @@ class HarvestScheduleController extends Controller
 
         $harvestSchedule->update($validated);
 
-        return back()->with('success', 'Harvest schedule updated successfully!');
+        // Log the updated estimated stock
+        ListingStockLog::create([
+            'listing_id' => $validated['listing_id'],
+            'quantity'   => $validated['estimated_stock'],
+            'source'     => 'harvest_schedule',
+        ]);
+
+        // Recalculate discount for the listing
+        $listing  = $harvestSchedule->listing;
+        $discount = HarvestDiscountService::recalculateForListing($listing);
+
+        $message = 'Harvest schedule updated successfully!';
+        if ($discount > 0) {
+            $message .= " 🏷️ {$discount}% auto-discount applied based on surplus stock.";
+        }
+
+        return back()->with('success', $message);
     }
 
+    /**
+     * Delete a harvest schedule.
+     */
     public function destroy(HarvestSchedule $harvestSchedule): RedirectResponse
     {
         $farmer = auth()->user();
         $farmerListingIds = $farmer->listings()->pluck('listing_id')->toArray();
 
+        // Verify ownership
         if (!in_array($harvestSchedule->listing_id, $farmerListingIds)) {
             abort(403);
         }
 
+        // Prevent deletion of past schedules
         if ($harvestSchedule->isPast()) {
             return back()->with('error', 'Cannot delete past harvest schedules.');
         }
 
+        $listing = $harvestSchedule->listing;
         $harvestSchedule->delete();
+
+        // Recalculate discount after deletion (may remove discount)
+        HarvestDiscountService::recalculateForListing($listing);
 
         return back()->with('success', 'Harvest schedule deleted successfully!');
     }

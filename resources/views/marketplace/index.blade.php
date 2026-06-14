@@ -24,9 +24,7 @@
                 <div class="flex-1 min-w-[250px] relative">
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Search produce or farm names..."
-
                         class="w-full pl-12 pr-4 py-3 rounded-full bg-white border border-gray-200 text-sm focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100">
-
                 </div>
                 <select name="sort" onchange="document.getElementById('filterForm').submit()"
                     class="px-5 py-3 rounded-full bg-white border border-gray-200 text-sm text-gray-600 focus:outline-none focus:border-green-400 cursor-pointer">
@@ -42,7 +40,6 @@
             <!-- Sidebar Filters (collapsible on mobile) -->
             <div class="mt-6 grid lg:grid-cols-4 gap-6" x-data="{ open: false }">
                 <div class="lg:col-span-1">
-
                     <button type="button" @click="open = !open" class="lg:hidden w-full py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 mb-3">
                         🔽 Filters
                     </button>
@@ -101,7 +98,6 @@
                         <a href="{{ route('marketplace') }}" class="block text-center text-xs text-gray-400 hover:text-gray-600">Reset all</a>
                     </div>
                 </div>
-        </form>
 
                 <!-- Product Grid -->
                 <div class="lg:col-span-3">
@@ -127,13 +123,21 @@
                                         @if($listing->created_at->diffInDays(now()) < 3)
                                             <span class="absolute top-3 left-3 px-2.5 py-1 bg-green-600 text-white rounded-full text-xs font-semibold">New</span>
                                         @endif
-                                        <span class="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
+                                        <span class="absolute top-3 right-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-green-700">{{ $listing->produce->category ?? '' }}</span>
                                     </div>
-                                    <div class="p-4">
+                                        <div class="p-4">
                                         <h3 class="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-green-700 transition-colors line-clamp-1">{{ $listing->title }}</h3>
                                         <p class="text-xs text-gray-400 mb-2 line-clamp-1">{{ $listing->farmer->name ?? 'Farmer' }} · {{ $listing->farmer->city ?? '' }}</p>
                                         <div class="flex items-center justify-between">
-                                            <span class="text-sm font-bold text-green-800">Rp {{ number_format($listing->price, 0, ',', '.') }} <span class="text-xs text-gray-400 font-normal">/{{ $listing->unit ?? 'kg' }}</span></span>
+                                            <div>
+                                                @if($listing->hasDiscount())
+                                                    <span class="text-xs text-gray-400 line-through">Rp {{ number_format($listing->price, 0, ',', '.') }}</span>
+                                                    <span class="text-sm font-bold text-green-800">Rp {{ number_format($listing->effectivePrice(), 0, ',', '.') }} <span class="text-xs text-gray-400 font-normal">/{{ $listing->unit ?? 'kg' }}</span></span>
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 ml-1">🏷️ {{ $listing->formattedDiscount() }}</span>
+                                                @else
+                                                    <span class="text-sm font-bold text-green-800">Rp {{ number_format($listing->price, 0, ',', '.') }} <span class="text-xs text-gray-400 font-normal">/{{ $listing->unit ?? 'kg' }}</span></span>
+                                                @endif
+                                            </div>
                                             <div class="flex items-center gap-0.5 text-xs">
                                                 <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                                 <span class="font-semibold text-gray-600">{{ number_format($listing->averageRating() ?? 0, 1) }}</span>
@@ -141,28 +145,17 @@
                                         </div>
                                     </div>
                                 </a>
-
-                                {{-- Favorite Heart Toggle --}}
-                                @auth
-                                    @if(auth()->user()->isCustomer())
-                                        <form method="POST" action="{{ route('customer.favorites.toggle', $listing->listing_id) }}" class="absolute top-3 right-3 z-10">
-                                            @csrf
-                                            @php
-                                                $isFavorited = auth()->user()->wishlists()->where('listing_listing_id', $listing->listing_id)->exists();
-                                            @endphp
-                                            <button type="submit"
-                                                    dusk="add-to-favorite"
-                                                    class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200"
-                                                    title="{{ $isFavorited ? 'Remove from favorites' : 'Add to favorites' }}">
-                                                @if($isFavorited)
-                                                    <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
-                                                @else
-                                                    <svg class="w-4 h-4 text-gray-400 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                                                @endif
-                                            </button>
-                                        </form>
-                                    @endif
-                                @endauth
+                                <!-- Wishlist -->
+                                <form method="POST" action="{{ route('customer.wishlist.toggle', $listing) }}" class="absolute top-3 right-14 z-10">
+                                    @csrf
+                                    <button class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-sm">
+                                        @if(in_array($listing->listing_id, $wishlistIds ?? []))
+                                            <span class="text-red-500">❤️</span>
+                                        @else
+                                            <span class="text-gray-400">🤍</span>
+                                        @endif
+                                    </button>
+                                </form>
                             </div>
                         @empty
                             <div class="col-span-full text-center py-20">
@@ -177,6 +170,6 @@
                     <div class="mt-8">{{ $listings->appends(request()->query())->links() }}</div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </x-app-layout>
