@@ -97,7 +97,7 @@
                     </form>
 
                     <div class="flex gap-3 mb-6">
-                        <form method="POST" action="{{ route('customer.wishlist.toggle', $listing) }}" class="flex-1">
+                        <form method="POST" action="{{ route('customer.favorites.toggle', $listing) }}" class="flex-1">
                             @csrf
                             <button class="w-full py-3 border-2 {{ $isWishlisted ? 'border-red-300 bg-red-50 text-red-600' : 'border-gray-200 text-gray-600 hover:border-green-300' }} rounded-full font-semibold transition-all">
                                 {{ $isWishlisted ? '❤️ Saved' : '🤍 Save to Wishlist' }}

@@ -146,7 +146,7 @@
                                     </div>
                                 </a>
                                 <!-- Wishlist -->
-                                <form method="POST" action="{{ route('customer.wishlist.toggle', $listing) }}" class="absolute top-3 right-14 z-10">
+                                <form method="POST" action="{{ route('customer.favorites.toggle', $listing) }}" class="absolute top-3 right-14 z-10">
                                     @csrf
                                     <button class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-sm">
                                         @if(in_array($listing->listing_id, $wishlistIds ?? []))
