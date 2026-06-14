@@ -82,7 +82,7 @@
 
                                                 {{-- Unit Price --}}
                                                 <p class="text-sm text-gray-500 mt-1">
-                                                    Rp {{ number_format($item->listing->price, 0, ',', '.') }}
+                                                    Rp {{ number_format($item->effectivePrice(), 0, ',', '.') }}
                                                     <span class="text-gray-400">/ {{ $item->listing->unit ?? 'kg' }}</span>
                                                 </p>
                                             </div>
@@ -91,7 +91,7 @@
                                             <div class="hidden sm:block text-right">
                                                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Subtotal</p>
                                                 <p class="text-lg font-bold text-green-700 mt-0.5">
-                                                    Rp {{ number_format($item->quantity * $item->listing->price, 0, ',', '.') }}
+                                                    Rp {{ number_format($item->subtotal(), 0, ',', '.') }}
                                                 </p>
                                             </div>
                                         </div>
@@ -130,7 +130,7 @@
                                             {{-- Mobile Subtotal --}}
                                             <div class="sm:hidden">
                                                 <p class="text-base font-bold text-green-700">
-                                                    Rp {{ number_format($item->quantity * $item->listing->price, 0, ',', '.') }}
+                                                    Rp {{ number_format($item->subtotal(), 0, ',', '.') }}
                                                 </p>
                                             </div>
 
@@ -177,9 +177,9 @@
                                         <div class="flex justify-between items-start text-sm">
                                             <div class="flex-1 mr-3">
                                                 <p class="text-gray-700 font-medium truncate">{{ $item->listing->title }}</p>
-                                                <p class="text-gray-400 text-xs">{{ $item->quantity }} × Rp {{ number_format($item->listing->price, 0, ',', '.') }}</p>
+                                                <p class="text-gray-400 text-xs">{{ $item->quantity }} × Rp {{ number_format($item->effectivePrice(), 0, ',', '.') }}</p>
                                             </div>
-                                            <p class="text-gray-900 font-medium whitespace-nowrap">Rp {{ number_format($item->quantity * $item->listing->price, 0, ',', '.') }}</p>
+                                            <p class="text-gray-900 font-medium whitespace-nowrap">Rp {{ number_format($item->subtotal(), 0, ',', '.') }}</p>
                                         </div>
                                     @endforeach
                                 </div>

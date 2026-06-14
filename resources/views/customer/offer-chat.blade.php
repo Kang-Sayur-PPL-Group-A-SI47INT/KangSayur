@@ -85,6 +85,37 @@
                         <button class="w-full py-2.5 border border-red-200 text-red-500 font-medium rounded-xl hover:bg-red-50 transition-all duration-200 text-sm">✕ Withdraw Offer</button>
                     </form>
                 </div>
+                @elseif($offer->status === 'accepted')
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
+                    <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+                        <p class="text-xs text-green-800 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                            🎉 Deal Agreed!
+                        </p>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Negotiated price: <span class="font-bold text-green-700">Rp {{ number_format($offer->currentPrice(), 0, ',', '.') }}</span>
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ route('customer.cart.add', $offer->listing) }}" class="space-y-3">
+                        @csrf
+                        <input type="hidden" name="offer_id" value="{{ $offer->offer_id }}">
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Quantity</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="quantity" value="1" min="1" max="{{ $offer->listing->quantity }}" required
+                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm text-center font-bold transition-all">
+                                <span class="text-xs text-gray-500 font-medium whitespace-nowrap">/ {{ $offer->listing->unit ?? 'kg' }}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Stock: {{ $offer->listing->quantity }} {{ $offer->listing->unit ?? 'kg' }}</p>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-green-700 to-green-800 text-white font-bold rounded-xl hover:from-green-800 hover:to-green-900 transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                            Add to Cart
+                        </button>
+                    </form>
+                </div>
                 @endif
             </div>
 
