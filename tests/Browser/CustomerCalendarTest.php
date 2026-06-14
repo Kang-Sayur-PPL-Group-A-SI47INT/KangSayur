@@ -12,9 +12,6 @@ use Tests\DuskTestCase;
 
 class CustomerCalendarTest extends DuskTestCase
 {
-    /**
-     * Test positive case: A customer can view the harvest calendar.
-     */
     public function test_customer_can_view_calendar(): void
     {
         $customer = User::factory()->create([
@@ -30,9 +27,6 @@ class CustomerCalendarTest extends DuskTestCase
         });
     }
 
-    /**
-     * Test positive case: A customer can view a schedule with an auto-discount in the calendar modal.
-     */
     public function test_customer_sees_discount_in_calendar(): void
     {
         $customer = User::factory()->create([
@@ -60,7 +54,6 @@ class CustomerCalendarTest extends DuskTestCase
             'produce_produce_id' => $produce->produce_id,
         ]);
 
-        // Establish a baseline average of 10
         \App\Models\ListingStockLog::create([
             'listing_id' => $listing->listing_id,
             'quantity' => 10,
@@ -74,10 +67,9 @@ class CustomerCalendarTest extends DuskTestCase
         $schedule = HarvestSchedule::create([
             'listing_id' => $listing->listing_id,
             'availability_date' => $futureDate->format('Y-m-d'),
-            'estimated_stock' => 20, // Avg will be (10+20)/2 = 15. Surplus is 20-15 = 5. 5/15 = 33% (>25% -> 15% discount)
+            'estimated_stock' => 20,
         ]);
 
-        // Manually apply the discount since we're bypassing the controller
         HarvestDiscountService::applyDiscount($listing, $schedule);
         $listing->refresh();
 
@@ -85,8 +77,7 @@ class CustomerCalendarTest extends DuskTestCase
             $browser->loginAs($customer)
                 ->visit('/customer/harvest-calendar')
                 ->waitForText('Harvest Calendar')
-                // Wait for the specific day cell to be visible and click it
-                ->waitFor("div[x-data] div.grid.grid-cols-7 > div:not(.bg-gray-50\\/30)") // Broad selector to wait for grid
+                ->waitFor("div[x-data] div.grid.grid-cols-7 > div:not(.bg-gray-50\\/30)")
                 ->pause(1000)
                 ->script("document.querySelectorAll('div.grid.grid-cols-7 > div').forEach(el => {
                     if (el.textContent.includes('$futureDay')) {
@@ -95,12 +86,11 @@ class CustomerCalendarTest extends DuskTestCase
                 });");
                 
             $browser->pause(1000)
-                // Wait for the modal to appear
                 ->waitFor('#customer-date-detail-content')
                 ->assertSee('Wortel Segar Lembang Test')
                 ->assertSee('🏷️')
                 ->assertSee('15% OFF')
-                ->assertSee('85.000'); // Effective price
+                ->assertSee('85.000');
         });
     }
 }

@@ -11,9 +11,7 @@ use Tests\DuskTestCase;
 
 class FarmerCalendarDiscountTest extends DuskTestCase
 {
-    /**
-     * Test positive case: A farmer sees the discount preview when creating a schedule with high stock.
-     */
+    
     public function test_farmer_sees_discount_preview_on_create(): void
     {
         $farmer = User::factory()->create([
@@ -37,7 +35,6 @@ class FarmerCalendarDiscountTest extends DuskTestCase
             'produce_produce_id' => $produce->produce_id,
         ]);
 
-        // Establish a baseline average of 10
         ListingStockLog::create([
             'listing_id' => $listing->listing_id,
             'quantity' => 10,
@@ -52,10 +49,8 @@ class FarmerCalendarDiscountTest extends DuskTestCase
                 ->press('Add Schedule')
                 ->pause(500)
                 ->select('listing_id', $listing->listing_id)
-                // When we type 20, average is 10. 20 is +100% surplus -> 15% discount.
                 ->type('estimated_stock', '20')
                 ->pause(500)
-                // Wait for the Alpine JS preview text
                 ->waitForText('will trigger a 15% auto-discount')
                 ->assertSee('🏷️')
                 ->assertSee('Based on your average harvest of 10 units')
