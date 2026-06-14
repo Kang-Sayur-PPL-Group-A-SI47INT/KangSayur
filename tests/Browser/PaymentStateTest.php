@@ -7,16 +7,22 @@ use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 use App\Models\User;
 
-class CheckoutTest extends DuskTestCase
+class PaymentStateTest extends DuskTestCase
 {
-    public function testCheckoutQris(): void
+    protected function setUp(): void
     {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
+        parent::setUp();
 
-        $this->browse(function ($browser) use ($user): void {
-            $browser->LoginAs($user)
+        // Seed the order statuses before each test
+            $this->artisan('db:seed', ['--class' => 'OrderStatusSeeder']);
+            }   
+
+    public function testContinuePayment(): void
+    {
+        $customer = User::where('email', 'dusk_customer@kangsayur.com')->firstOrFail();
+
+        $this->browse(function ($browser) use ($customer): void {
+            $browser->LoginAs($customer)
                     ->visit('/')
                     ->clickLink('Marketplace')
                     ->assertPathIs('/marketplace')
@@ -29,23 +35,22 @@ class CheckoutTest extends DuskTestCase
                     ->type('delivery_phone','676767676767')
                     ->type('delivery_address','Jl. Telkomsel')
                     ->click('@proceed-to-payment')
-                    ->waitForText('Complete Your Payment')
-                    ->click('@qris-method-btn')
-                    ->click('@confirm-pay-btn')
-                    ->waitFor('@qris-qr-image')
-                    ->assertVisible('@qris-qr-image');
-                    #SucessfulCheckoutCheckQR                   
+                    ->click('@orders-button', 100)
+                    ->waitForText('Awaiting Payment')
+                    ->click('@continue-payment-button')
+                    ->waitForText('Complete Your Payment');
         });
     }
-    
-     public function testCheckoutPhoneFail(): void
-    {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
 
-        $this->browse(function ($browser) use ($user): void {
-            $browser->LoginAs($user)
+
+
+    public function testCancelPayment(): void
+    {
+        $customer = User::where('email', 'dusk_customer@kangsayur.com')->firstOrFail();
+        
+
+        $this->browse(function ($browser) use ($customer): void {
+            $browser->LoginAs($customer)
                     ->visit('/')
                     ->clickLink('Marketplace')
                     ->assertPathIs('/marketplace')
@@ -55,23 +60,27 @@ class CheckoutTest extends DuskTestCase
                     ->assertPathIs('/cart')
                     ->click('@proceed-to-checkout')
                     ->type('delivery_name','test')
-                    ->type('delivery_phone','324')
+                    ->type('delivery_phone','676767676767')
                     ->type('delivery_address','Jl. Telkomsel')
                     ->click('@proceed-to-payment')
-                    ->waitForText('The delivery phone field must be between 7 and 16 digits.');
-                    #failPhoneNumber
-        }); 
-    }  
+                    ->waitFor('@orders-button') #order button in header
+                    ->click('@orders-button')
+                    ->waitForText('Awaiting Payment')
+                    ->click('@cancel-order-button')
+                    ->waitForDialog()
+                    ->assertDialogOpened('Are you sure you want to cancel this order? This cannot be undone.')
+                    ->acceptDialog();
+        });
+    }
 
-    
-    public function testCheckoutFormFail(): void
+
+
+    public function testPaidPayment(): void
     {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
+        $customer = User::where('email', 'dusk_customer@kangsayur.com')->firstOrFail();
 
-        $this->browse(function ($browser) use ($user): void {
-            $browser->LoginAs($user)
+        $this->browse(function ($browser) use ($customer): void {
+            $browser->LoginAs($customer)
                     ->visit('/')
                     ->clickLink('Marketplace')
                     ->assertPathIs('/marketplace')
@@ -80,8 +89,13 @@ class CheckoutTest extends DuskTestCase
                     ->click('.relative.p-2.text-gray-500.hover\:text-green-700.transition-colors') #cart icon
                     ->assertPathIs('/cart')
                     ->click('@proceed-to-checkout')
-                    ->assertPathIs('/checkout');
-                    #CheckoutFormFail         
+                    ->type('delivery_name','test')
+                    ->type('delivery_phone','676767676767')
+                    ->type('delivery_address','Jl. Telkomsel')
+                    ->click('@proceed-to-payment')
+                    ->waitFor('@orders-button') #order button in header
+                    ->click('@orders-button') 
+                    ->waitForText('Paid');
         });
     }
 }

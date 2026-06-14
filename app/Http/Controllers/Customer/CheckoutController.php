@@ -41,13 +41,13 @@ class CheckoutController extends Controller
         ));
     }
     /**
-     * Process the checkout — create transaction and redirect to payment simulation.
+     * Process the checkout — create transaction and redirect to payment.
      */
     public function process(Request $request)
     {
         $request->validate([
             'delivery_name' => 'required|string|max:100',
-            'delivery_phone' => 'required|string|max:20',
+            'delivery_phone' => 'required|digits_between:7,16|max:20',
             'delivery_address' => 'required|string|max:500',
             'delivery_latitude' => 'nullable|numeric|between:-90,90',
             'delivery_longitude' => 'nullable|numeric|between:-180,180',
@@ -116,7 +116,7 @@ class CheckoutController extends Controller
         }
     }
     /**
-     * Show the payment simulation page.
+     * Show the payment page.
      */
     public function paymentPage(Transaction $transaction)
     {
@@ -131,13 +131,19 @@ class CheckoutController extends Controller
         }
         $transaction->load(['items.listing.farmer', 'items.listing.produce']);
         return view('marketplace.payment', compact('transaction'));
+
+        //Cancel order
+        if ($transaction->status === 'canceled') {
+            return redirect()->route('customer.orders.detail', $transaction->transaction_id)
+                ->with('info','Order has been cancelled.');
+        }
     }
     /**
      * Simulate a successful payment (no real payment gateway needed).
      */
     public function simulatePayment(Transaction $transaction)
     {
-        // Verify ownership
+        // Verify user
         if ($transaction->user_user_id !== auth()->id()) {
             abort(403);
         }
@@ -236,4 +242,41 @@ class CheckoutController extends Controller
 
         return back()->with('success', 'Order berhasil dibatalkan.');
     }
-}
+
+    //Cancel in checkout
+
+    public function cancelOrder(Transaction $transaction)
+    {
+        if ($transaction->user_user_id !== auth()->id()) {
+            abort(403); //checking if not user id
+        }
+
+        if (!in_array($transaction->status, ['pending'])) {
+            return back()->with('error', 'Only pending can be cancelled');
+        }
+
+        //update status to cancel
+       $transaction->update(['status' => 'cancelled']);
+        return redirect()->route('customer.orders')->with('success','Order has been cancelled');
+    }
+
+    public function confirmDelivery(Transaction $transaction)
+    {
+        if ($transaction->user_user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($transaction->status !== 'shipping') {
+            return back()->with('error','Order cannot be confirmed at this stage.');
+        }
+
+        $transaction->update(['status' => 'delivered']);
+
+        return redirect()->route('customer.orders.detail',$transaction->transaction_id)->with('success','Order marked as received.');
+    }
+}    
+
+
+
+
+

@@ -72,7 +72,7 @@
                         Order Timeline
                     </h3>
                     @php
-                        $statuses = ['pending', 'paid', 'processing', 'shipped', 'delivered'];
+                        $statuses = ['pending', 'paid', 'shipping', 'delivered'];
                         $currentIndex = array_search($transaction->status, $statuses);
                         if ($currentIndex === false) $currentIndex = -1;
                         $isCancelled = $transaction->status === 'cancelled';
@@ -86,9 +86,8 @@
                                 $labels = [
                                     'pending' => ['label' => 'Order Placed', 'desc' => 'Your order has been created'],
                                     'paid' => ['label' => 'Payment Confirmed', 'desc' => 'Payment has been verified'],
-                                    'processing' => ['label' => 'Processing', 'desc' => 'Farmer is preparing your order'],
-                                    'shipped' => ['label' => 'Shipped', 'desc' => 'Your order is on its way'],
-                                    'delivered' => ['label' => 'Delivered', 'desc' => 'Order has been delivered'],
+                                    'shipping' => ['label' => 'Shipping', 'desc' => 'Farmer is preparing your order'],
+                                    'delivered' => ['label' => 'Delivered', 'desc' => 'Your order has been delivered'],
                                 ];
                             @endphp
                             <div class="flex items-start gap-4 {{ !$loop->last ? 'pb-6' : '' }} relative">
@@ -332,6 +331,35 @@
                         💳 Complete Payment
                     </a>
                 @endif
+
+                {{-- Confirm Delivery! For those already shipping duh --}}
+                @if($transaction->status === 'shipping')
+                    <form method="POST"
+                          action="{{ route('customer.orders.confirmDelivery', $transaction->transaction_id) }}"
+                          onsubmit="return confirm('Have you received your order? If yes, proceed')">
+                        @csrf
+                        <button type="submit"
+                         class="w-full flex items-center justify-center gap-2 py-3 px-6 bg-green-600 text-white text-sm font-semibold rounded-2xl hover:bg-green-700 transition-all duration-200">
+                        Finish Order</button>
+                        </form>
+                @endif
+
+                {{-- Cancel Order button--}} 
+                @if($transaction->status === 'pending')
+                    <form method="POST" action="{{ route('customer.orders.cancel', $transaction->transaction_id) }}"
+                        onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.')">
+                        @csrf
+                        <button type="submit"
+                                dusk="cancel-order-button"
+                                class="w-full flex items-center justify-center gap-2 py-3 px-6 border-2 border-red-300 text-red-600 text-sm font-semibold rounded-2xl hover:bg-red-50 hover:border-red-400 transition-all duration-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel Order 
+                        </button>
+                    </form>
+                @endif
+
 
                 <a href="{{ route('customer.orders') }}"
                    class="flex items-center justify-center gap-2 py-3 px-6 bg-cream-100 text-green-800 text-sm font-semibold rounded-2xl hover:bg-cream-200 transition-all duration-200">

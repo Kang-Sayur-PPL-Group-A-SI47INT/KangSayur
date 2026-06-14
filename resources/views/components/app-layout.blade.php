@@ -42,7 +42,7 @@
                                         <a href="{{ route('customer.favorites') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.favorites') ? 'nav-link-active' : 'nav-link' }}">
                                             Favorites
                                         </a>
-                                        <a href="{{ route('customer.orders') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.orders*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="{{ route('customer.orders') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.orders*') ? 'nav-link-active' : 'nav-link' }}" dusk="orders-button">
                                             Orders
                                         </a>
                                         <a href="{{ route('customer.harvest-calendar.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.harvest-calendar*') ? 'nav-link-active' : 'nav-link' }}">

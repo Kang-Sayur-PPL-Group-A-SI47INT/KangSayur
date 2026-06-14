@@ -14,6 +14,10 @@ use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
 use App\Http\Controllers\Admin;
 
+Route::post('/checkout/{transaction_id}/pay', [Customer\OrderController::class, 'pay'])
+     ->name('customer.checkout.pay');
+
+
 Route::get('/', function () {
     $featuredListings = collect();
     // Only query if the listings table exists
@@ -88,7 +92,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/checkout/payment/{transaction}/simulate', [CheckoutController::class, 'simulatePayment'])->name('customer.checkout.simulate');
     Route::get('/orders', [CheckoutController::class, 'orders'])->name('customer.orders');
     Route::get('/orders/{transaction}', [CheckoutController::class, 'orderDetail'])->name('customer.orders.detail');
-    Route::post('/orders/{transaction}/cancel', [CheckoutController::class, 'cancelOrder'])->name('customer.orders.cancel');
+    Route::post('/orders/{transaction}/cancel',[CheckoutController::class, 'cancelOrder'])->name('customer.orders.cancel');
+    Route::post('/orders/{transaction}/confirm-delivery',[CheckoutController::class, 'confirmDelivery'])->name('customer.orders.confirmDelivery');
 });
 // Favorites routes
 Route::middleware(['auth'])->group(function () {

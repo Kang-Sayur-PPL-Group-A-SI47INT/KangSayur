@@ -9,13 +9,15 @@
                     $statusColors = [
                         'pending' => 'bg-amber-100 text-amber-700',
                         'paid' => 'bg-blue-100 text-blue-700',
-                        'completed' => 'bg-green-100 text-green-700',
+                        'shipping' => 'bg-indigo-100 text-indigo-700',
+                        'delivered' => 'bg-green-100 text-green-700',
                         'cancelled' => 'bg-red-100 text-red-700',
                     ];
                     $statusLabels = [
                         'pending' => 'Awaiting Payment',
-                        'paid' => 'Processing',
-                        'completed' => 'Completed',
+                        'paid' => 'Paid',
+                        'shipping' => 'Shipping',
+                        'delivered' => 'Delivered',
                         'cancelled' => 'Cancelled',
                     ];
                 @endphp
@@ -59,13 +61,40 @@
                         <p class="font-bold text-gray-900">Total: <span class="text-green-700">Rp {{ number_format($order->grandTotal(), 0, ',', '.') }}</span></p>
                     </div>
 
+                    {{-- Button: View Details visible; Except for pending --}}
+                    <div class="mt-4 flex items-center gap-2">
+                    <a href="{{ route('customer.orders.detail', $order->transaction_id) }}"
+                    class="flex-1 text-center py-2 px-4 text-sm font-semibold text-green-700 border border-green-200 rounded-xl hover:bg-green-50 transition-all duration-200">
+                        Track Order
+                    </a>
+
+                    {{-- Continue Payment --}}
                     @if($order->status === 'pending')
-                    <div class="mt-4">
-                        <a href="{{ route('customer.checkout.payment', $order) }}" class="inline-block px-6 py-2 bg-green-800 text-white text-sm font-semibold rounded-full hover:bg-green-900">
-                            Complete Payment →
+                        <a href="{{ route('customer.checkout.payment',$order->transaction_id) }}"
+                            class="flex-1 text-center py-2 px-4 text-sm font-semibold text-white bg-green-700 rounded-xl hover:bg-green-800 transition-all duration-200" dusk="continue-payment-button">
+                            Continue Payment
                         </a>
-                    </div>
                     @endif
+
+                    {{-- Cancel Order button --}}
+                    @if($order->status === 'pending')
+                    <form method="POST"
+                        action="{{ route('customer.orders.cancel', $order->transaction_id) }}"
+                        onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.')"
+                        class="flex-1">
+                        @csrf
+                        <button type="submit"
+                                dusk="cancel-order-button"
+                                class="w-full py-2 px-4 text-sm font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 hover:border-red-300 transition-all duration-200 flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel Order
+                        </button>
+                    </form>          
+                @endif
+            </div>            
+
                 </div>
             @empty
                 <div class="text-center py-20">
