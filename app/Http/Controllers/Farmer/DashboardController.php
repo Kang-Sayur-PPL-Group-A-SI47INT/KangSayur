@@ -2,9 +2,9 @@
 namespace App\Http\Controllers\Farmer;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
-
 use App\Models\Rating;
 use App\Models\Transaction;
+use App\Models\TransactionItem;
 use Illuminate\View\View;
 class DashboardController extends Controller
 {
@@ -12,13 +12,13 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $listingIds = $user->listings()->pluck('listing_id');
-       
+
         $activeListings = $user->listings()->where('status', 'active')->count();
-        
+
         // Calculate total earnings for the farmer's items in paid/completed/processing/shipped/delivered transactions
-        $totalEarnings = \App\Models\TransactionItem::whereIn('listing_listing_id', $listingIds)
+        $totalEarnings = TransactionItem::whereIn('listing_listing_id', $listingIds)
             ->whereHas('transaction', function ($q) {
-                $q->whereIn('status', ['paid', 'processing', 'shipped', 'delivered', 'completed']);
+                $q->whereIn('status', ['paid', 'processing', 'shipping', 'shipped', 'delivered', 'completed']);
             })
             ->sum('subtotal');
 
@@ -36,14 +36,14 @@ class DashboardController extends Controller
             'pending_offers' => 0,
             'average_rating' => round($user->averageRating() ?? 0, 1),
         ];
-        
+
         // Recent ratings
         $recentRatings = Rating::with(['user', 'listing'])
             ->whereIn('listing_listing_id', $listingIds)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-            
+
         // Recent orders
         $recentOrders = Transaction::with(['user', 'items.listing'])
             ->whereHas('items', fn($q) => $q->whereIn('listing_listing_id', $listingIds))
@@ -63,7 +63,34 @@ class DashboardController extends Controller
         ];
         $dailyTip = $tips[date('z') % count($tips)];
 
-   
-        return view('farmer.dashboard', compact('stats', 'recentRatings', 'recentOrders', 'dailyTip'));
+        // --- Chart data ---
+
+        // Monthly earnings for last 6 months
+        $monthlyEarnings = collect();
+        for ($i = 5; $i >= 0; $i--) {
+            $start = now()->subMonths($i)->startOfMonth();
+            $end   = now()->subMonths($i)->endOfMonth();
+            $earnings = TransactionItem::whereIn('listing_listing_id', $listingIds)
+                ->whereHas('transaction', function ($q) use ($start, $end) {
+                    $q->whereIn('status', ['paid', 'processing', 'shipping', 'shipped', 'delivered', 'completed'])
+                      ->whereBetween('created_at', [$start, $end]);
+                })
+                ->sum('subtotal');
+            $monthlyEarnings->push([
+                'month'    => $start->format('M Y'),
+                'earnings' => (float) $earnings,
+            ]);
+        }
+
+        // Order status breakdown (all time for this farmer)
+        $orderStatusRows = Transaction::whereHas('items', fn($q) => $q->whereIn('listing_listing_id', $listingIds))
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        return view('farmer.dashboard', compact(
+            'stats', 'recentRatings', 'recentOrders', 'dailyTip',
+            'monthlyEarnings', 'orderStatusRows'
+        ));
     }
 }
