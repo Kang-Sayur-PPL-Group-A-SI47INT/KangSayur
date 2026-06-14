@@ -12,7 +12,7 @@ use Tests\DuskTestCase;
 
 class CustomerCalendarTest extends DuskTestCase
 {
-    public function test_customer_can_view_calendar(): void
+    public function testCustomerCanViewCalendar(): void
     {
         $customer = User::factory()->create([
             'role' => 'customer',
@@ -27,7 +27,7 @@ class CustomerCalendarTest extends DuskTestCase
         });
     }
 
-    public function test_customer_sees_discount_in_calendar(): void
+    public function testCustomerSeesDiscountInCalendar(): void
     {
         $customer = User::factory()->create([
             'role' => 'customer',

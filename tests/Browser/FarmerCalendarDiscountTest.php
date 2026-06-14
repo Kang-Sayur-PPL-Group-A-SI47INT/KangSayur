@@ -11,8 +11,7 @@ use Tests\DuskTestCase;
 
 class FarmerCalendarDiscountTest extends DuskTestCase
 {
-    
-    public function test_farmer_sees_discount_preview_on_create(): void
+    public function testFarmerSeesDiscountPreviewOnCreate(): void
     {
         $farmer = User::factory()->create([
             'role' => 'farmer',
