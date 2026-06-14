@@ -8,15 +8,21 @@ use Tests\DuskTestCase;
 use App\Models\User;
 
 class PaymentStateTest extends DuskTestCase
-{   
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Seed the order statuses before each test
+            $this->artisan('db:seed', ['--class' => 'OrderStatusSeeder']);
+            }   
+
     public function testContinuePayment(): void
     {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
+        $customer = User::where('email', 'dusk_customer@kangsayur.com')->firstOrFail();
 
-        $this->browse(function ($browser) use ($user): void {
-            $browser->LoginAs($user)
+        $this->browse(function ($browser) use ($customer): void {
+            $browser->LoginAs($customer)
                     ->visit('/')
                     ->clickLink('Marketplace')
                     ->assertPathIs('/marketplace')
@@ -40,12 +46,11 @@ class PaymentStateTest extends DuskTestCase
 
     public function testCancelPayment(): void
     {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
+        $customer = User::where('email', 'dusk_customer@kangsayur.com')->firstOrFail();
+        
 
-        $this->browse(function ($browser) use ($user): void {
-            $browser->LoginAs($user)
+        $this->browse(function ($browser) use ($customer): void {
+            $browser->LoginAs($customer)
                     ->visit('/')
                     ->clickLink('Marketplace')
                     ->assertPathIs('/marketplace')
@@ -70,15 +75,12 @@ class PaymentStateTest extends DuskTestCase
 
 
 
-
     public function testPaidPayment(): void
     {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
+        $customer = User::where('email', 'dusk_customer@kangsayur.com')->firstOrFail();
 
-        $this->browse(function ($browser) use ($user): void {
-            $browser->LoginAs($user)
+        $this->browse(function ($browser) use ($customer): void {
+            $browser->LoginAs($customer)
                     ->visit('/')
                     ->clickLink('Marketplace')
                     ->assertPathIs('/marketplace')
