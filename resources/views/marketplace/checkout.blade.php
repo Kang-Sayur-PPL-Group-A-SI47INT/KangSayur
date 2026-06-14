@@ -48,7 +48,10 @@
                                 @error('delivery_phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Address</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Delivery Address
+                                    <span id="checkout-addr-indicator" class="ml-2 text-xs text-green-600 font-normal"></span>
+                                </label>
                                 <textarea name="delivery_address" required rows="3" placeholder="Full street address, city, postal code..."
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm resize-none transition-all duration-200">{{ old('delivery_address', auth()->user()->address) }}</textarea>
                                 @error('delivery_address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -362,6 +365,22 @@
                     badge.classList.remove('hidden');
                     document.getElementById('checkout-distance-text').textContent = '~' + maxDist.toFixed(1) + ' km from farm';
                 }
+
+                // Reverse geocode to auto-fill delivery address
+                const addrField = document.querySelector('textarea[name="delivery_address"]');
+                const addrIndicator = document.getElementById('checkout-addr-indicator');
+                if (addrIndicator) addrIndicator.textContent = '⏳ Fetching address...';
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latF}&lon=${lngF}&addressdetails=1`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.display_name && addrField) {
+                            addrField.value = data.display_name;
+                            if (addrIndicator) addrIndicator.textContent = '✅ Auto-filled from map';
+                        }
+                    })
+                    .catch(() => {
+                        if (addrIndicator) addrIndicator.textContent = '';
+                    });
             }
 
             // Place existing pin

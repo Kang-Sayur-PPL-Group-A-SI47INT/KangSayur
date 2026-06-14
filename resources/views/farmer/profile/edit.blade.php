@@ -97,15 +97,22 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi Pertanian</label>
                     <textarea name="farm_description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">{{ old('farm_description', $user->farm_description) }}</textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Kota</label>
-                        <input type="text" name="city" value="{{ old('city', $user->city) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-semibold text-gray-700">Kota &amp; Alamat</label>
+                        <span id="farmer-loc-indicator" class="text-xs text-green-600"></span>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat</label>
-                        <input type="text" name="address" value="{{ old('address', $user->address) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Kota</label>
+                            <input type="text" name="city" id="farmer-city" value="{{ old('city', $user->city) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Alamat</label>
+                            <input type="text" name="address" id="farmer-address" value="{{ old('address', $user->address) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
+                        </div>
                     </div>
+                    <p class="text-xs text-gray-400 mt-1.5">📍 Pilih lokasi di peta untuk mengisi otomatis</p>
                 </div>
                 {{-- Interactive Map for Farm Location --}}
                 <div>
@@ -308,6 +315,29 @@
             document.getElementById('farmer-longitude').value = lngFixed;
             document.getElementById('farmer-lat-display').textContent = latFixed;
             document.getElementById('farmer-lng-display').textContent = lngFixed;
+
+            // Reverse geocode to auto-fill Kota and Alamat
+            const locIndicator = document.getElementById('farmer-loc-indicator');
+            if (locIndicator) locIndicator.textContent = '⏳ Mengambil alamat...';
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latFixed}&lon=${lngFixed}&addressdetails=1`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.address) {
+                        const addr = data.address;
+                        const cityField = document.querySelector('input[name="city"]');
+                        const addressField = document.querySelector('input[name="address"]');
+                        if (cityField) {
+                            cityField.value = addr.city || addr.town || addr.regency || addr.county || addr.state_district || '';
+                        }
+                        if (addressField) {
+                            addressField.value = data.display_name || '';
+                        }
+                        if (locIndicator) locIndicator.textContent = '✅ Alamat diisi otomatis dari peta';
+                    }
+                })
+                .catch(() => {
+                    if (locIndicator) locIndicator.textContent = '';
+                });
         }
 
         // Place existing marker

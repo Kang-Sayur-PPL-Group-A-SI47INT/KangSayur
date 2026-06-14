@@ -40,6 +40,62 @@
             </div>
         </div>
 
+        <!-- Charts -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+            <!-- Monthly Earnings Bar Chart -->
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">📈 Monthly Earnings</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Last 6 months — paid & completed orders</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 220px;">
+                    <canvas id="farmerEarningsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Order Status Donut -->
+            <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-gray-900">🗂️ Order Status</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">All-time breakdown</p>
+                </div>
+                <div style="position: relative; height: 180px;">
+                    <canvas id="farmerOrderStatusChart"></canvas>
+                </div>
+                {{-- Legend --}}
+                <div class="mt-4 space-y-1.5">
+                    @php
+                        $statusColors = [
+                            'pending'   => ['bg' => 'bg-amber-400',  'label' => 'Pending'],
+                            'paid'      => ['bg' => 'bg-blue-500',   'label' => 'Paid'],
+                            'processing'=> ['bg' => 'bg-indigo-400', 'label' => 'Processing'],
+                            'shipping'  => ['bg' => 'bg-purple-500', 'label' => 'Shipping'],
+                            'shipped'   => ['bg' => 'bg-violet-500', 'label' => 'Shipped'],
+                            'delivered' => ['bg' => 'bg-emerald-500','label' => 'Delivered'],
+                            'completed' => ['bg' => 'bg-green-600',  'label' => 'Completed'],
+                            'cancelled' => ['bg' => 'bg-red-400',    'label' => 'Cancelled'],
+                        ];
+                    @endphp
+                    @foreach($orderStatusRows as $status => $count)
+                        @if($count > 0)
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full {{ $statusColors[$status]['bg'] ?? 'bg-gray-400' }}"></div>
+                                <span class="text-gray-600">{{ $statusColors[$status]['label'] ?? ucfirst($status) }}</span>
+                            </div>
+                            <span class="font-semibold text-gray-800">{{ $count }}</span>
+                        </div>
+                        @endif
+                    @endforeach
+                    @if($orderStatusRows->isEmpty())
+                        <p class="text-xs text-gray-400 text-center py-2">No orders yet</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         <div class="grid lg:grid-cols-2 gap-8">
             <!-- Recent Orders -->
             <div class="bg-white rounded-2xl border border-gray-100 p-6">
@@ -116,4 +172,124 @@
             @endforeach
         </div>
     </div>
+
+    {{-- Chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ── Monthly Earnings Bar Chart ──────────────────────────────
+        const earningsLabels  = @json($monthlyEarnings->pluck('month'));
+        const earningsData    = @json($monthlyEarnings->pluck('earnings'));
+
+        new Chart(document.getElementById('farmerEarningsChart'), {
+            type: 'bar',
+            data: {
+                labels: earningsLabels,
+                datasets: [{
+                    label: 'Earnings (Rp)',
+                    data: earningsData,
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    borderColor: '#059669',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => 'Rp ' + ctx.parsed.y.toLocaleString('id-ID'),
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 }, color: '#6b7280' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: {
+                            font: { size: 11 },
+                            color: '#6b7280',
+                            callback: val => 'Rp ' + (val >= 1000000
+                                ? (val / 1000000).toFixed(1) + 'M'
+                                : val >= 1000 ? (val / 1000).toFixed(0) + 'K' : val),
+                        }
+                    }
+                }
+            }
+        });
+
+        // ── Order Status Donut Chart ────────────────────────────────
+        @php
+            $statusColorMap = [
+                'pending'    => '#fbbf24',
+                'paid'       => '#3b82f6',
+                'processing' => '#818cf8',
+                'shipping'   => '#a855f7',
+                'shipped'    => '#8b5cf6',
+                'delivered'  => '#10b981',
+                'completed'  => '#059669',
+                'cancelled'  => '#f87171',
+            ];
+            $statusLabelMap = [
+                'pending'    => 'Pending',
+                'paid'       => 'Paid',
+                'processing' => 'Processing',
+                'shipping'   => 'Shipping',
+                'shipped'    => 'Shipped',
+                'delivered'  => 'Delivered',
+                'completed'  => 'Completed',
+                'cancelled'  => 'Cancelled',
+            ];
+            $donutLabels = $orderStatusRows->keys()->map(fn($s) => $statusLabelMap[$s] ?? ucfirst($s))->values();
+            $donutData   = $orderStatusRows->values();
+            $donutColors = $orderStatusRows->keys()->map(fn($s) => $statusColorMap[$s] ?? '#9ca3af')->values();
+        @endphp
+
+        const donutLabels = @json($donutLabels);
+        const donutData   = @json($donutData);
+        const donutColors = @json($donutColors);
+
+        if (donutData.length > 0 && donutData.some(v => v > 0)) {
+            new Chart(document.getElementById('farmerOrderStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: donutLabels,
+                    datasets: [{
+                        data: donutData,
+                        backgroundColor: donutColors,
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverOffset: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.label + ': ' + ctx.parsed + ' orders',
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            const canvas = document.getElementById('farmerOrderStatusChart');
+            const ctx2 = canvas.getContext('2d');
+            canvas.style.display = 'none';
+            canvas.parentElement.innerHTML += '<p class="text-center text-gray-400 text-sm pt-12">No orders yet</p>';
+        }
+    });
+    </script>
 </x-app-layout>
