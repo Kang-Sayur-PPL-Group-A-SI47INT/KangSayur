@@ -156,16 +156,54 @@
                 @endif
 
 
-                <!-- Reviews -->
+                <!-- Ratings & Reviews -->
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-gray-900">Customer Reviews</h3>
+                        <h3 class="font-bold text-gray-900">Ratings & Reviews</h3>
                         @if($totalReviews > 3)
                             <a href="{{ route('marketplace.reviews', $listing->listing_id) }}" class="text-sm text-green-700 hover:text-green-800 font-medium transition-colors">
                                 View all {{ $totalReviews }} reviews →
                             </a>
                         @endif
                     </div>
+
+                    {{-- Rating Summary --}}
+                    @if($totalReviews > 0)
+                    <div class="bg-gray-50 rounded-2xl p-5 mb-5">
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            {{-- Average Score --}}
+                            <div class="flex flex-col items-center justify-center sm:min-w-[120px]">
+                                <span class="text-4xl font-extrabold text-gray-900 leading-none">{{ number_format($averageRating, 1) }}</span>
+                                <div class="text-amber-400 text-lg mt-1.5 tracking-wide">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= round($averageRating))
+                                            ★
+                                        @else
+                                            <span class="text-gray-300">☆</span>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1.5">{{ $totalReviews }} {{ Str::plural('review', $totalReviews) }}</p>
+                            </div>
+
+                            {{-- Distribution Bars --}}
+                            <div class="flex-1 space-y-2">
+                                @foreach($distribution as $star => $data)
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-xs font-medium text-gray-600 w-8 text-right flex items-center justify-end gap-0.5">
+                                            {{ $star }} <span class="text-amber-400 text-[10px]">★</span>
+                                        </span>
+                                        <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-500"
+                                                 style="width: {{ $data['percentage'] }}%"></div>
+                                        </div>
+                                        <span class="text-[10px] text-gray-400 w-10 text-right">{{ $data['count'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                     <div class="space-y-3">
                         {{-- Current user's review first (highlighted) --}}
