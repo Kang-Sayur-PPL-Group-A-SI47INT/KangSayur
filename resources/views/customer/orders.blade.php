@@ -61,8 +61,9 @@
 
                     @if($order->status === 'pending')
                     <div class="mt-4">
-                        
-                        <h1 class="text-green-700">INI BUAT TEST</h1>
+                        <a href="{{ route('customer.checkout.payment', $order) }}" class="inline-block px-6 py-2 bg-green-800 text-white text-sm font-semibold rounded-full hover:bg-green-900">
+                            Complete Payment →
+                        </a>
                     </div>
                     @endif
                 </div>

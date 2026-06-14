@@ -77,9 +77,9 @@ class CheckoutController extends Controller
         $orderId = 'KS-' . strtoupper(Str::random(8)) . '-' . time();
         try {
             $transaction = DB::transaction(function () use (
-                $request, $user, $cart, $subtotal, $deliveryFee, $orderId
+                $request, $user, $cart, $subtotal, $deliveryFee, $orderId, $deliveryLat, $deliveryLng
             ) {
-                // Create the transaction record
+                // Create the transaction record with cancel deadline (5 minutes)
                 $transaction = Transaction::create([
                     'total_price' => $subtotal,
                     'delivery_fee' => $deliveryFee,
@@ -92,6 +92,7 @@ class CheckoutController extends Controller
                     'midtrans_order_id' => $orderId,
                     'user_user_id' => $user->user_id,
                     'cart_cart_id' => $cart->cart_id,
+                    'customer_cancel_deadline' => now()->addMinutes(5),
                 ]);
                 // Snapshot cart items into transaction items
                 foreach ($cart->items as $item) {
@@ -148,6 +149,7 @@ class CheckoutController extends Controller
             'status' => 'paid',
             'payment_type' => 'simulated',
             'paid_at' => now(),
+            'paid_status_at' => now(),
         ]);
         // Decrement stock for each purchased item
         $transaction->load('items.listing');
@@ -189,6 +191,49 @@ class CheckoutController extends Controller
             abort(403);
         }
         $transaction->load(['items.listing.farmer', 'items.listing.produce']);
-        return view('customer.order-detail', compact('transaction'));
+
+        // Load existing ratings by this user for listings in this transaction
+        $user = auth()->user();
+        $listingIds = $transaction->items->pluck('listing_listing_id')->filter()->toArray();
+        $existingRatings = \App\Models\Rating::where('user_user_id', $user->user_id)
+            ->whereIn('listing_listing_id', $listingIds)
+            ->get()
+            ->keyBy('listing_listing_id');
+
+        return view('customer.order-detail', compact('transaction', 'existingRatings'));
+    }
+
+    /**
+     * Cancel an order (customer-initiated).
+     * Only allowed within 5 minutes of order creation and before shipping.
+     */
+    public function cancelOrder(Transaction $transaction)
+    {
+        // Verify ownership
+        if ($transaction->user_user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if (!$transaction->canCustomerCancel()) {
+            return back()->with('error', 'Order tidak dapat dibatalkan. Batas waktu pembatalan telah lewat atau pesanan sudah dikirim.');
+        }
+
+        // Restore stock if the order was paid
+        if ($transaction->status === 'paid') {
+            foreach ($transaction->items as $item) {
+                $listing = $item->listing;
+                if ($listing) {
+                    $listing->update([
+                        'quantity' => $listing->quantity + $item->quantity,
+                        'status' => $listing->quantity + $item->quantity > 0 && $listing->status === 'sold_out'
+                            ? 'active' : $listing->status,
+                    ]);
+                }
+            }
+        }
+
+        $transaction->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Order berhasil dibatalkan.');
     }
 }

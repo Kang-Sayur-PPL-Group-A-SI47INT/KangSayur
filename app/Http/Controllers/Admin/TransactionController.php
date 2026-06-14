@@ -40,20 +40,41 @@ class TransactionController extends Controller
         if (!in_array($newStatus, $allowed)) {
             return back()->with('error', "Tidak dapat mengubah status dari '{$currentStatus}' ke '{$newStatus}'.");
         }
+
         $updateData = ['status' => $newStatus];
         if ($newStatus === 'paid' && !$transaction->paid_at) {
             $updateData['paid_at'] = now();
+            $updateData['paid_status_at'] = now();
         }
         $transaction->update($updateData);
-        return back()->with('success', "Status transaksi berhasil diubah ke '{$newStatus}'.");
+        return back()->with('success', "Status order berhasil diubah ke '{$newStatus}'.");
     }
+
     /**
-     * Cancel a transaction (only pending or paid).
+     * Verify shipping proof and advance status to 'shipped' (delivered).
+     */
+    public function verifyShippingProof(Transaction $transaction): RedirectResponse
+    {
+        if ($transaction->status !== 'shipping') {
+            return back()->with('error', 'Order harus berstatus Shipping untuk verifikasi bukti.');
+        }
+
+        if (!$transaction->hasShippingProof()) {
+            return back()->with('error', 'Farmer belum mengupload bukti pengiriman.');
+        }
+
+        $transaction->update(['status' => 'delivered']);
+
+        return back()->with('success', 'Bukti pengiriman terverifikasi! Order telah diselesaikan. ✅');
+    }
+
+    /**
+     * Cancel a transaction (only pending or paid, NOT shipping/delivered).
      */
     public function cancel(Transaction $transaction): RedirectResponse
     {
-        if (!in_array($transaction->status, ['pending', 'paid'])) {
-            return back()->with('error', 'Hanya transaksi pending atau paid yang dapat dibatalkan.');
+        if (!$transaction->canBeCancelled()) {
+            return back()->with('error', 'Order yang sudah dikirim atau selesai tidak dapat dibatalkan.');
         }
         // Restore stock if the order was paid (stock was decremented)
         if ($transaction->status === 'paid') {
@@ -69,6 +90,6 @@ class TransactionController extends Controller
             }
         }
         $transaction->update(['status' => 'cancelled']);
-        return back()->with('success', 'Transaksi berhasil dibatalkan.');
+        return back()->with('success', 'Order berhasil dibatalkan.');
     }
 }

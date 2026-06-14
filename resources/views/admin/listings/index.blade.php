@@ -28,6 +28,7 @@
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Stok</th>
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Dibuat</th>
+                        <th class="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -59,9 +60,18 @@
                                 <span class="px-2 py-1 text-xs rounded-full border {{ $statusBadge }}">{{ ucfirst($listing->status) }}</span>
                             </td>
                             <td class="px-6 py-4 text-gray-500 text-sm">{{ $listing->created_at->format('d M Y') }}</td>
+                            <td class="px-6 py-4 text-right">
+                                <form method="POST" action="{{ route('admin.listings.destroy', $listing) }}" onsubmit="return confirm('Yakin nonaktifkan listing ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors">
+                                        🚫 Nonaktifkan
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="text-center py-8 text-gray-400">Tidak ada listing ditemukan.</td></tr>
+                        <tr><td colspan="7" class="text-center py-8 text-gray-400">Tidak ada listing ditemukan.</td></tr>
                     @endforelse
                 </tbody>
             </table>

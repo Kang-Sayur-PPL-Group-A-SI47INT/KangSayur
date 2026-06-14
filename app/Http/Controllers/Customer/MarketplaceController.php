@@ -83,7 +83,28 @@ class MarketplaceController extends Controller
             ->take(4)
             ->get();
 
-        return view('marketplace.show', compact('listing', 'relatedListings'));
+        // Rating distribution for PBI 27
+        $totalReviews = $listing->ratings->count();
+        $distribution = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $count = $listing->ratings->where('score', $i)->count();
+            $distribution[$i] = [
+                'count'      => $count,
+                'percentage' => $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0,
+            ];
+        }
+
+        $averageRating = $totalReviews > 0 ? round($listing->ratings->avg('score'), 1) : 0;
+
+        // Current user's existing review (for PBI 28 delete)
+        $userRating = null;
+        if (auth()->check()) {
+            $userRating = $listing->ratings->where('user_user_id', auth()->user()->user_id)->first();
+        }
+
+        return view('marketplace.show', compact(
+            'listing', 'relatedListings', 'distribution', 'averageRating', 'totalReviews', 'userRating'
+        ));
     }
 
     public function showFarmer($id): View

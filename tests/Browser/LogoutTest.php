@@ -67,4 +67,40 @@ class LogoutTest extends DuskTestCase
             ;
         });
     }
+
+    /**
+     * Test unauthenticated user cannot access farmer dashboard.
+     */
+    public function test_unauthenticated_cannot_access_farmer_dashboard(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/farmer/dashboard')
+                ->assertPathIs('/login')
+                ;
+        });
+    }
+
+    /**
+     * Test unauthenticated user cannot access admin dashboard.
+     */
+    public function test_unauthenticated_cannot_access_admin_dashboard(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/admin/dashboard')
+                ->assertPathIs('/login')
+                ;
+        });
+    }
+
+    /**
+     * Test logged out user cannot access checkout.
+     */
+    public function test_logged_out_user_cannot_access_checkout(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/checkout')
+                ->assertPathIs('/login')
+                ;
+        });
+    }
 }

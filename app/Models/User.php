@@ -29,6 +29,9 @@ class User extends Authenticatable
         'doc_skt',
         'doc_land_cert',
         'verified_at',
+        'is_banned',
+        'banned_at',
+        'ban_reason',
     ];
     protected $hidden = [
         'password',
@@ -43,7 +46,14 @@ class User extends Authenticatable
             'longitude' => 'decimal:8',
             'is_public_profile' => 'boolean',
             'verified_at' => 'datetime',
+            'is_banned' => 'boolean',
+            'banned_at' => 'datetime',
         ];
+    }
+    // Ban helper
+    public function isBanned(): bool
+    {
+        return $this->is_banned;
     }
     // Role helpers
     public function isAdmin(): bool

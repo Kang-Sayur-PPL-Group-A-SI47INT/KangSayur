@@ -9,9 +9,11 @@ use App\Http\Controllers\Customer;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\FavoriteController;
+use App\Http\Controllers\Customer\RatingController;
 use App\Http\Controllers\Farmer;
 use App\Http\Controllers\Farmer\ListingController;
 use App\Http\Controllers\Admin;
+
 Route::get('/', function () {
     $featuredListings = collect();
     // Only query if the listings table exists
@@ -55,7 +57,14 @@ Route::middleware(['auth', 'role:farmer'])->prefix('farmer')->name('farmer.')->g
         // Orders
         Route::get('/orders', [Farmer\OrderController::class, 'index'])->name('orders.index');
         Route::post('/orders/{id}/status', [Farmer\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::post('/orders/{id}/shipping-proof', [Farmer\OrderController::class, 'uploadShippingProof'])->name('orders.uploadShippingProof');
         Route::delete('/orders/{id}', [Farmer\OrderController::class, 'destroy'])->name('orders.destroy');
+
+        // Harvest Calendar
+        Route::get('/harvest-calendar', [Farmer\HarvestScheduleController::class, 'index'])->name('harvest-calendar.index');
+        Route::post('/harvest-schedules', [Farmer\HarvestScheduleController::class, 'store'])->name('harvest-schedules.store');
+        Route::put('/harvest-schedules/{harvestSchedule}', [Farmer\HarvestScheduleController::class, 'update'])->name('harvest-schedules.update');
+        Route::delete('/harvest-schedules/{harvestSchedule}', [Farmer\HarvestScheduleController::class, 'destroy'])->name('harvest-schedules.destroy');
     });
 });
 Route::middleware('auth')->group(function () {
@@ -79,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/checkout/payment/{transaction}/simulate', [CheckoutController::class, 'simulatePayment'])->name('customer.checkout.simulate');
     Route::get('/orders', [CheckoutController::class, 'orders'])->name('customer.orders');
     Route::get('/orders/{transaction}', [CheckoutController::class, 'orderDetail'])->name('customer.orders.detail');
+    Route::post('/orders/{transaction}/cancel', [CheckoutController::class, 'cancelOrder'])->name('customer.orders.cancel');
 });
 // Favorites routes
 Route::middleware(['auth'])->group(function () {
@@ -86,10 +96,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/favorites/{listing}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
 });
 
+// Rating & Review routes (PBI 25-28)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+    Route::delete('/ratings/{rating}', [RatingController::class, 'destroy'])->name('ratings.destroy');
+    Route::get('/marketplace/{listing}/reviews', [RatingController::class, 'index'])->name('marketplace.reviews');
+});
+
 // customer orders
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     // Orders
     Route::get('/orders', [Customer\OrderController::class, 'index'])->name('orders');
+
+    // Harvest Calendar (read-only)
+    Route::get('/harvest-calendar', [Customer\HarvestCalendarController::class, 'index'])->name('harvest-calendar.index');
 });
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -99,13 +119,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/verifications/{user}', [Admin\FarmerVerificationController::class, 'show'])->name('verifications.show');
     Route::post('/verifications/{user}/approve', [Admin\FarmerVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [Admin\FarmerVerificationController::class, 'reject'])->name('verifications.reject');
-    // Transaction Management
+    // Order Management (renamed from Transaction)
     Route::get('/transactions', [Admin\TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions/{transaction}/status', [Admin\TransactionController::class, 'updateStatus'])->name('transactions.updateStatus');
     Route::post('/transactions/{transaction}/cancel', [Admin\TransactionController::class, 'cancel'])->name('transactions.cancel');
+    Route::post('/transactions/{transaction}/verify-proof', [Admin\TransactionController::class, 'verifyShippingProof'])->name('transactions.verifyProof');
     // User & Listing Management
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/listings', [Admin\ListingController::class, 'index'])->name('listings.index');
+    Route::post('/users/{user}/ban', [Admin\UserController::class, 'ban'])->name('users.ban');
+    Route::post('/users/{user}/unban', [Admin\UserController::class, 'unban'])->name('users.unban');
+    Route::delete('/listings/{listing}', [Admin\ListingController::class, 'destroy'])->name('listings.destroy');
 });
 
 // Bargain / Offer routes — Customer
