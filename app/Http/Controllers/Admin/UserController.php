@@ -7,13 +7,22 @@ use App\Models\BannedIdentifier;
 use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::query();
+        // Add avg_rating as a computed column via correlated subquery (farmers only)
+        $query = User::query()->addSelect([
+            'users.*',
+            DB::raw('(SELECT COALESCE(AVG(r.score), 0)
+                      FROM ratings r
+                      JOIN listings l ON r.listing_listing_id = l.listing_id
+                      WHERE l.user_user_id = users.user_id) AS avg_rating'),
+        ]);
+
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
@@ -30,8 +39,16 @@ class UserController extends Controller
                 $query->where('is_banned', false);
             }
         }
-        $users = $query->orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.users.index', compact('users'));
+
+        $allowed   = ['name', 'created_at', 'role', 'avg_rating'];
+        $sort      = in_array($request->get('sort'), $allowed) ? $request->get('sort') : 'created_at';
+        $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
+
+        $query->orderBy($sort, $direction);
+
+        $users = $query->paginate(15);
+
+        return view('admin.users.index', compact('users', 'sort', 'direction'));
     }
 
     public function ban(Request $request, User $user)

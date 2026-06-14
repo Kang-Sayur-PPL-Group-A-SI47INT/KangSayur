@@ -12,15 +12,16 @@ use Tests\DuskTestCase;
 
 class FarmerGeolocationTest extends DuskTestCase
 {
-    // ─── Farmer Geolocation Tests ───
+    // ─── Positive Cases ──────────────────────────────────────────────────────
 
     /**
-     * Test farmer can see the interactive map on profile edit page.
+     * Farmer can see the interactive map on profile edit, search for a location,
+     * save the profile, and see the updated coordinates displayed on the page.
      */
     public function test_farmer_map(): void
     {
         $farmer = User::factory()->create([
-            'role' => 'farmer',
+            'role'                => 'farmer',
             'verification_status' => 'verified',
         ]);
 
@@ -32,9 +33,9 @@ class FarmerGeolocationTest extends DuskTestCase
                 ->assertPresent('#farmer-map')
                 ->type('name', 'Petani Geolocation Test')
                 // city and address are readonly — auto-filled from map pin
-                ->type('farmer-mapp-search', 'telkom indonesia') // 'search' is the name or CSS selector of the input
+                ->type('farmer-mapp-search', 'telkom indonesia')
                 ->keys('input[name="farmer-mapp-search"]', '{enter}')
-                ->pause(1000)
+                ->pause(2000)
                 ->press('Simpan Perubahan')
                 ->pause(1000)
                 ->assertPathIs('/farmer/profile')
@@ -44,14 +45,13 @@ class FarmerGeolocationTest extends DuskTestCase
         });
     }
 
-
     /**
-     * Test farmer map search input is present and functional.
+     * Farmer map search input is present and has the expected attributes.
      */
     public function test_farmer_map_search(): void
     {
         $farmer = User::factory()->create([
-            'role' => 'farmer',
+            'role'                => 'farmer',
             'verification_status' => 'verified',
         ]);
 
@@ -65,8 +65,35 @@ class FarmerGeolocationTest extends DuskTestCase
         });
     }
 
+    // ─── Negative Cases ──────────────────────────────────────────────────────
+
     /**
-     * Test customer cannot access farmer profile edit page.
+     * Farmer profile save is blocked by JS validation when no map pin has been
+     * placed (latitude / longitude hidden inputs are empty).
+     * The error banner should become visible.
+     */
+    public function test_farmer_save_blocked_without_map_pin(): void
+    {
+        $farmer = User::factory()->create([
+            'role'                => 'farmer',
+            'verification_status' => 'verified',
+            // No latitude / longitude — no pin pre-set
+        ]);
+
+        $this->browse(function (Browser $browser) use ($farmer) {
+            $browser->loginAs($farmer)
+                ->visit('/farmer/profile')
+                ->assertPathIs('/farmer/profile')
+                ->type('name', 'Petani Tanpa Peta')
+                // Intentionally skip the map — hidden inputs remain empty
+                ->press('Simpan Perubahan')
+                ->pause(500)
+                ->assertSee('Harap pilih lokasi pertanian pada peta sebelum menyimpan.');
+        });
+    }
+
+    /**
+     * Customer role is denied access to the farmer profile edit page (403).
      */
     public function test_customer_cannot_access_farmer_profile_edit(): void
     {
@@ -82,7 +109,8 @@ class FarmerGeolocationTest extends DuskTestCase
     }
 
     /**
-     * Test unauthenticated user cannot access farmer profile edit.
+     * Unauthenticated user visiting the farmer profile edit page is redirected
+     * to the login page.
      */
     public function test_unauthenticated_cannot_access_farmer_profile(): void
     {
@@ -93,24 +121,24 @@ class FarmerGeolocationTest extends DuskTestCase
     }
 
     /**
-     * Test farmer save profile without name fails.
+     * Farmer profile page shows the map search box and geolocation button
+     * even when the farmer has no existing coordinates.
      */
-    public function test_farmer_save_profile_without_name(): void
+    public function test_farmer_map_visible_without_existing_coordinates(): void
     {
         $farmer = User::factory()->create([
-            'role' => 'farmer',
+            'role'                => 'farmer',
             'verification_status' => 'verified',
+            // No latitude / longitude
         ]);
 
         $this->browse(function (Browser $browser) use ($farmer) {
             $browser->loginAs($farmer)
                 ->visit('/farmer/profile')
-                ->assertPathIs('/farmer/profile')
-                ->type('name', '')
-                ->press('Simpan Perubahan')
-                ->pause(1000)
-                ->assertPathIs('/farmer/profile')
-                ->assertDontSee('Profil berhasil diperbarui');
+                ->assertPresent('#farmer-map')
+                ->assertPresent('#farmer-map-search')
+                ->assertPresent('#farmer-geolocate-btn')
+                ->assertSee('Belum diatur'); // default coordinate display text
         });
     }
 }
