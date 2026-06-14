@@ -95,7 +95,7 @@
                         $daySchedules = $schedules->get($day, collect());
                         $hasSchedules = $daySchedules->count() > 0;
                     @endphp
-                    <div dusk="day-cell-{{ $day }}" class="min-h-[100px] sm:min-h-[120px] border-b border-r border-gray-50 p-1.5 sm:p-2 relative transition-colors duration-150
+                    <div class="min-h-[100px] sm:min-h-[120px] border-b border-r border-gray-50 p-1.5 sm:p-2 relative transition-colors duration-150
                         {{ $isPast ? 'bg-gray-50/40' : ($hasSchedules ? 'hover:bg-emerald-50/40 cursor-pointer' : 'hover:bg-gray-50/60') }}
                         {{ $isToday ? 'ring-2 ring-inset ring-green-400/50 bg-green-50/20' : '' }}"
                         @if($hasSchedules)
@@ -164,7 +164,6 @@
              x-transition:leave-end="opacity-0">
             <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showDateDetail = false"></div>
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative z-10 max-h-[80vh] overflow-y-auto"
-                 @click.away="showDateDetail = false"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100">
@@ -183,39 +182,8 @@
                     </div>
 
                     {{-- Schedule Cards --}}
-                    <div class="space-y-3">
-                        <template x-for="s in (schedulesData[selectedDay] || [])" :key="s.id">
-                            <div class="p-4 rounded-xl border transition-shadow"
-                                 :class="s.isPast ? 'bg-gray-50 border-gray-100' : 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-100 hover:shadow-sm'">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <p class="font-bold text-gray-900 text-sm" x-text="s.title"></p>
-                                            <template x-if="s.isPast">
-                                                <span class="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">Past</span>
-                                            </template>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mb-2" x-text="'🧑‍🌾 ' + s.farmerName + (s.produce ? ' · ' + s.produce : '')"></p>
-                                        <div class="flex items-center flex-wrap gap-2">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
-                                                  :class="s.isPast ? 'bg-gray-200 text-gray-500' : 'bg-emerald-100 text-emerald-800'">
-                                                <span x-text="'📦 ' + s.stock + ' ' + s.unit + ' available'"></span>
-                                            </span>
-                                            <span class="text-xs font-semibold text-green-800" x-text="'Rp ' + Number(s.price).toLocaleString('id-ID') + ' / ' + s.unit"></span>
-                                        </div>
-                                    </div>
-                                    <template x-if="!s.isPast">
-                                        <a :href="s.listingUrl"
-                                           class="flex-shrink-0 px-3 py-2 bg-green-800 text-white text-xs font-semibold rounded-xl hover:bg-green-900 transition-colors whitespace-nowrap">
-                                            View Listing →
-                                        </a>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-                        <template x-if="(schedulesData[selectedDay] || []).length === 0">
-                            <p class="text-gray-400 text-sm text-center py-6">No harvests on this date.</p>
-                        </template>
+                    <div class="space-y-3" id="customer-date-detail-content">
+                        {{-- Populated via Alpine.js --}}
                     </div>
                 </div>
             </div>
@@ -228,7 +196,6 @@
         function customerCalendar() {
             return {
                 showDateDetail: false,
-                selectedDay: null,
                 selectedDateLabel: '',
 
                 // Schedule data indexed by day number
@@ -247,6 +214,9 @@
                                     'stock'        => $s->estimated_stock,
                                     'unit'         => $s->listing->unit ?? 'kg',
                                     'price'        => $s->listing->price,
+                                    'effectivePrice' => $s->listing->effectivePrice(),
+                                    'hasDiscount'  => $s->listing->hasDiscount(),
+                                    'discountPct'  => (float) $s->listing->discount_percentage,
                                     'listingUrl'   => route('marketplace.show', $s->listing->listing_id),
                                     'isPast'       => $s->isPast(),
                                 ];
@@ -257,8 +227,63 @@
                 })(),
 
                 openDateDetail(day, label) {
-                    this.selectedDay = day;
                     this.selectedDateLabel = label;
+                    const schedules = this.schedulesData[day] || [];
+                    const container = document.getElementById('customer-date-detail-content');
+                    container.innerHTML = '';
+
+                    if (schedules.length === 0) {
+                        container.innerHTML = '<p class="text-gray-400 text-sm text-center py-6">No harvests on this date.</p>';
+                    } else {
+                        schedules.forEach(s => {
+                            const isPastClass = s.isPast
+                                ? 'bg-gray-50 border-gray-100'
+                                : 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-100 hover:shadow-sm';
+                            const badgeClass = s.isPast
+                                ? 'bg-gray-200 text-gray-500'
+                                : 'bg-emerald-100 text-emerald-800';
+
+                            const card = document.createElement('div');
+                            card.className = `p-4 rounded-xl border ${isPastClass} transition-shadow`;
+                            card.innerHTML = `
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <p class="font-bold text-gray-900 text-sm">${s.title}</p>
+                                            ${s.isPast ? '<span class="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">Past</span>' : ''}
+                                        </div>
+                                        <p class="text-xs text-gray-500 mb-2">🧑‍🌾 ${s.farmerName}${s.produce ? ' · ' + s.produce : ''}</p>
+                                        <div class="flex items-center flex-wrap gap-2">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${badgeClass}">
+                                                📦 ${s.stock} ${s.unit} available
+                                            </span>
+                                            ${s.hasDiscount && !s.isPast ? `
+                                            <div class="flex items-center">
+                                                <span class="text-[10px] text-gray-400 line-through mr-1.5">Rp ${Number(s.price).toLocaleString('id-ID')}</span>
+                                                <span class="text-xs font-semibold text-green-800">
+                                                    Rp ${Number(s.effectivePrice).toLocaleString('id-ID')} / ${s.unit}
+                                                </span>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700 ml-1.5 shadow-sm">🏷️ ${s.discountPct}% OFF</span>
+                                            </div>
+                                            ` : `
+                                            <span class="text-xs font-semibold text-green-800">
+                                                Rp ${Number(s.price).toLocaleString('id-ID')} / ${s.unit}
+                                            </span>
+                                            `}
+                                        </div>
+                                    </div>
+                                    ${!s.isPast ? `
+                                    <a href="${s.listingUrl}"
+                                       class="flex-shrink-0 px-3 py-2 bg-green-800 text-white text-xs font-semibold rounded-xl hover:bg-green-900 transition-colors whitespace-nowrap">
+                                        View Listing →
+                                    </a>
+                                    ` : ''}
+                                </div>
+                            `;
+                            container.appendChild(card);
+                        });
+                    }
+
                     this.showDateDetail = true;
                 }
             };

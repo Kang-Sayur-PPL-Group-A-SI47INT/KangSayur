@@ -40,7 +40,7 @@ class CartItem extends Model
             return (float) $this->offer->currentPrice();
         }
 
-        return (float) $this->listing->price;
+        return (float) $this->listing->effectivePrice();
     }
 
     /**

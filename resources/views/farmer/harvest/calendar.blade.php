@@ -98,6 +98,9 @@
                                 {{ $isPast ? 'bg-gray-100 text-gray-400' : 'bg-emerald-100 text-emerald-800' }}">
                                 {{ Str::limit($schedule->listing->title, 12) }}
                                 <span class="font-bold">×{{ $schedule->estimated_stock }}</span>
+                                @if(!$isPast && $schedule->listing->hasDiscount() && $schedule->listing->auto_discount)
+                                    <span class="ml-0.5 text-amber-600">🏷️</span>
+                                @endif
                             </div>
                         @endforeach
                         @if($daySchedules->count() > 3)
@@ -162,11 +165,15 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold text-gray-900 text-sm" x-text="s.title"></p>
                                         <p class="text-xs text-gray-500 mt-0.5" x-text="s.dateLabel"></p>
-                                        <div class="flex items-center gap-2 mt-2">
+                                        <div class="flex items-center gap-2 mt-2 flex-wrap">
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
                                                   :class="s.isPast ? 'bg-gray-200 text-gray-500' : 'bg-emerald-100 text-emerald-700'">
                                                 <span x-text="'📦 ' + s.stock + ' units'"></span>
                                             </span>
+                                            <template x-if="s.hasDiscount">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-700"
+                                                      x-text="'🏷️ ' + s.discountPct + '% OFF'"></span>
+                                            </template>
                                         </div>
                                     </div>
                                     <template x-if="!s.isPast">
@@ -221,7 +228,7 @@
                     {{-- Listing Select --}}
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Listing</label>
-                        <select name="listing_id" required
+                        <select name="listing_id" required x-model="createListingId" @change="updateDiscountPreview()"
                             class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-all">
                             <option value="">Select a listing...</option>
                             @foreach($listings as $listing)
@@ -242,12 +249,22 @@
                     </div>
 
                     {{-- Estimated Stock --}}
-                    <div class="mb-6">
+                    <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estimated Stock</label>
                         <input type="number" name="estimated_stock" min="1" required
+                            x-model="createStock" @input="updateDiscountPreview()"
                             value="{{ old('estimated_stock') }}"
                             placeholder="e.g. 50"
                             class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-all">
+                    </div>
+
+                    {{-- Discount Preview --}}
+                    <div x-show="discountPreview" x-transition
+                         class="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🏷️</span>
+                            <span x-text="discountPreview"></span>
+                        </div>
                     </div>
 
                     <button type="submit"
@@ -368,6 +385,11 @@
                 selectedDay: null,
                 selectedDateLabel: '',
 
+                // Create form
+                createListingId: '',
+                createStock: '',
+                discountPreview: '',
+
                 // Edit form
                 editAction: '',
                 editListingId: '',
@@ -376,6 +398,27 @@
 
                 // Delete form
                 deleteAction: '',
+
+                // Listing averages for discount preview (passed from server)
+                listingAverages: (function() {
+                    @php
+                        $averages = [];
+                        foreach ($listings as $listing) {
+                            $averages[$listing->listing_id] = \App\Services\HarvestDiscountService::calculateAverageHarvest($listing);
+                        }
+                    @endphp
+                    return {!! json_encode($averages) !!};
+                })(),
+
+                // Discount tier table (mirrors server-side)
+                discountTiers: [
+                    { threshold: 25, discount: 15 },
+                    { threshold: 20, discount: 12 },
+                    { threshold: 15, discount: 10 },
+                    { threshold: 10, discount: 7 },
+                    { threshold: 7, discount: 5 },
+                    { threshold: 5, discount: 3 },
+                ],
 
                 // Schedule data indexed by day
                 schedulesData: (function() {
@@ -390,6 +433,8 @@
                                     'dateLabel'  => $s->availability_date->format('M d, Y'),
                                     'stock'      => $s->estimated_stock,
                                     'isPast'     => $s->isPast(),
+                                    'hasDiscount'=> $s->listing->hasDiscount() && $s->listing->auto_discount,
+                                    'discountPct'=> (float) $s->listing->discount_percentage,
                                 ];
                             })->values();
                         });
@@ -397,7 +442,42 @@
                     return {!! json_encode($schedulesJson) !!};
                 })(),
 
+                updateDiscountPreview() {
+                    const listingId = this.createListingId;
+                    const stock = parseFloat(this.createStock);
+
+                    if (!listingId || !stock || stock <= 0) {
+                        this.discountPreview = '';
+                        return;
+                    }
+
+                    const avg = this.listingAverages[listingId] || 0;
+                    if (avg <= 0) {
+                        this.discountPreview = '';
+                        return;
+                    }
+
+                    const surplusPercent = ((stock - avg) / avg) * 100;
+                    let discount = 0;
+
+                    for (const tier of this.discountTiers) {
+                        if (surplusPercent >= tier.threshold) {
+                            discount = tier.discount;
+                            break;
+                        }
+                    }
+
+                    if (discount > 0) {
+                        this.discountPreview = `Based on your average harvest of ${Math.round(avg)} units, this schedule of ${Math.round(stock)} units (+${Math.round(surplusPercent)}% surplus) will trigger a ${discount}% auto-discount.`;
+                    } else {
+                        this.discountPreview = '';
+                    }
+                },
+
                 openCreateModal() {
+                    this.createListingId = '';
+                    this.createStock = '';
+                    this.discountPreview = '';
                     this.showCreate = true;
                 },
 
