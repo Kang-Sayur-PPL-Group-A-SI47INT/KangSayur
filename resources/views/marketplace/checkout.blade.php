@@ -47,19 +47,13 @@
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm transition-all duration-200">
                                 @error('delivery_phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
+
+                            {{-- Delivery Location Map (required) --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Delivery Address
-                                    <span id="checkout-addr-indicator" class="ml-2 text-xs text-green-600 font-normal"></span>
+                                    📍 Pin Delivery Location
+                                    <span class="text-red-500 ml-0.5">*</span>
                                 </label>
-                                <textarea name="delivery_address" required rows="3" placeholder="Full street address, city, postal code..."
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none text-sm resize-none transition-all duration-200">{{ old('delivery_address', auth()->user()->address) }}</textarea>
-                                @error('delivery_address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-
-                            {{-- Delivery Location Map --}}
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">📍 Pin Delivery Location</label>
                                 <p class="text-xs text-gray-500 mb-2">Click on the map or search to pin your exact delivery location for accurate shipping costs.</p>
 
                                 {{-- Map Search --}}
@@ -94,9 +88,27 @@
                                     </span>
                                 </div>
 
+                                {{-- Map-required error message --}}
+                                <div id="checkout-map-error" class="hidden mt-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs flex items-center gap-2">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.539-1.333-3.309 0L3.732 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    Please pin your delivery location on the map before continuing.
+                                </div>
+
                                 {{-- Hidden coordinate inputs --}}
                                 <input type="hidden" name="delivery_latitude" id="checkout-latitude" value="{{ old('delivery_latitude', $userLatitude) }}">
                                 <input type="hidden" name="delivery_longitude" id="checkout-longitude" value="{{ old('delivery_longitude', $userLongitude) }}">
+                            </div>
+
+                            {{-- Delivery Address — read-only, auto-filled from map --}}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Delivery Address
+                                    <span id="checkout-addr-indicator" class="ml-2 text-xs text-green-600 font-normal"></span>
+                                </label>
+                                <textarea name="delivery_address" readonly rows="3"
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm resize-none text-gray-600 cursor-default outline-none">{{ old('delivery_address', auth()->user()->address) }}</textarea>
+                                <p class="text-xs text-gray-400 mt-1">📍 Auto-filled when you pin a location on the map above</p>
+                                @error('delivery_address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
                     </div>
@@ -236,8 +248,25 @@
     </style>
 
     <script>
-        // Prevent double submission
-        document.getElementById('checkout-form').addEventListener('submit', function () {
+        // Validate map pin and prevent double submission
+        document.getElementById('checkout-form').addEventListener('submit', function (e) {
+            const lat = document.getElementById('checkout-latitude').value;
+            const lng = document.getElementById('checkout-longitude').value;
+
+            if (!lat || !lng) {
+                e.preventDefault();
+                const mapErr = document.getElementById('checkout-map-error');
+                if (mapErr) {
+                    mapErr.classList.remove('hidden');
+                    mapErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            // Hide any previous error and lock button
+            const mapErr = document.getElementById('checkout-map-error');
+            if (mapErr) mapErr.classList.add('hidden');
+
             const btn = document.getElementById('checkout-submit-btn');
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Processing...';

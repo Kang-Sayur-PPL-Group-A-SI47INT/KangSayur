@@ -31,10 +31,9 @@ class FarmerGeolocationTest extends DuskTestCase
                 ->assertSee('Lokasi Pertanian')
                 ->assertPresent('#farmer-map')
                 ->type('name', 'Petani Geolocation Test')
-                ->type('city', 'Bandung')
-                ->type('address', 'Jl. Dago No. 100')
+                // city and address are readonly — auto-filled from map pin
                 ->type('farmer-mapp-search', 'telkom indonesia') // 'search' is the name or CSS selector of the input
-                ->keys('input[name="farmer-mapp-search"]', '{enter}') 
+                ->keys('input[name="farmer-mapp-search"]', '{enter}')
                 ->pause(1000)
                 ->press('Simpan Perubahan')
                 ->pause(1000)

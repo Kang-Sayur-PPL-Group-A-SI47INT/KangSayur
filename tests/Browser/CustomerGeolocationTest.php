@@ -12,7 +12,7 @@ use Tests\DuskTestCase;
 
 class CustomerGeolocationTest extends DuskTestCase
 {
-    
+
     public function test_customer_map(): void
     {
         // Create farmer with produce and listing
@@ -61,14 +61,13 @@ class CustomerGeolocationTest extends DuskTestCase
                 ->assertPresent('#checkout-map')
                 ->type('delivery_name', 'Customer Test')
                 ->type('delivery_phone', '081234567890')
-                ->type('delivery_address', 'Jl. Sudirman No. 1, Bandung')
-                // Set coordinates via hidden inputs (simulating map click)
+                // delivery_address is readonly — auto-filled from map pin
                 ->type('customer-map-search', 'Telkom university') // 'search' is the name or CSS selector of the input
-                ->keys('input[name="customer-map-search"]', '{enter}') 
+                ->keys('input[name="customer-map-search"]', '{enter}')
                 ->pause(1000)
                 ->assertSee("-6.973208, 107.630854");
         });
     }
 
-    
+
 }

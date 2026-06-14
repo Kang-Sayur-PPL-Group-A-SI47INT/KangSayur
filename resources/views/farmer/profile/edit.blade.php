@@ -74,7 +74,7 @@
         @endif
         {{-- Profile Form --}}
         <div class="bg-white rounded-2xl border border-gray-100 p-8">
-            <form method="POST" action="{{ route('farmer.profile.update') }}" enctype="multipart/form-data" class="space-y-6">
+            <form id="farmer-profile-form" method="POST" action="{{ route('farmer.profile.update') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf @method('PUT')
                 <div class="flex items-center gap-6 mb-6">
                     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
@@ -97,26 +97,12 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi Pertanian</label>
                     <textarea name="farm_description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">{{ old('farm_description', $user->farm_description) }}</textarea>
                 </div>
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-sm font-semibold text-gray-700">Kota &amp; Alamat</label>
-                        <span id="farmer-loc-indicator" class="text-xs text-green-600"></span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Kota</label>
-                            <input type="text" name="city" id="farmer-city" value="{{ old('city', $user->city) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Alamat</label>
-                            <input type="text" name="address" id="farmer-address" value="{{ old('address', $user->address) }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none">
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-1.5">📍 Pilih lokasi di peta untuk mengisi otomatis</p>
-                </div>
                 {{-- Interactive Map for Farm Location --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">📍 Lokasi Pertanian</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        📍 Lokasi Pertanian
+                        <span class="text-red-500 ml-0.5">*</span>
+                    </label>
                     <p class="text-xs text-gray-500 mb-3">Klik pada peta atau gunakan pencarian untuk menentukan lokasi pertanian Anda secara akurat.</p>
 
                     {{-- Search Bar --}}
@@ -148,6 +134,33 @@
                             <span class="text-xs text-gray-500 font-medium">Lng:</span>
                             <span id="farmer-lng-display" class="text-xs font-mono text-gray-700">{{ $user->longitude ?? 'Belum diatur' }}</span>
                         </div>
+                    </div>
+
+                    {{-- Map-required error --}}
+                    <div id="farmer-map-error" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs flex items-center gap-2">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.539-1.333-3.309 0L3.732 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Harap pilih lokasi pertanian pada peta sebelum menyimpan.
+                    </div>
+
+                    {{-- Kota & Alamat — read-only, auto-filled from map --}}
+                    <div class="mt-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-semibold text-gray-700">Kota &amp; Alamat</label>
+                            <span id="farmer-loc-indicator" class="text-xs text-green-600"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Kota</label>
+                                <input type="text" name="city" id="farmer-city" readonly value="{{ old('city', $user->city) }}"
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-default outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Alamat</label>
+                                <input type="text" name="address" id="farmer-address" readonly value="{{ old('address', $user->address) }}"
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-default outline-none text-sm">
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1.5">📍 Diisi otomatis saat Anda memilih lokasi pada peta</p>
                     </div>
 
                     {{-- Hidden Inputs --}}
@@ -408,6 +421,23 @@
 
         // Fix map rendering in case container was hidden
         setTimeout(() => map.invalidateSize(), 200);
+
+        // Map-required validation on profile form submit
+        const profileForm = document.getElementById('farmer-profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', function (e) {
+                const lat = document.getElementById('farmer-latitude').value;
+                const lng = document.getElementById('farmer-longitude').value;
+                if (!lat || !lng) {
+                    e.preventDefault();
+                    const mapErr = document.getElementById('farmer-map-error');
+                    if (mapErr) {
+                        mapErr.classList.remove('hidden');
+                        mapErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+        }
     });
     </script>
 </x-app-layout>

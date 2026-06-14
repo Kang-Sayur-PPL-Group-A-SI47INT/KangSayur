@@ -12,7 +12,10 @@ class CheckoutTest extends DuskTestCase
     public function testCheckoutQris(): void
     {
         $user = User::factory()->create([
-            'role'=>'customer',
+            'role'      => 'customer',
+            'latitude'  => -6.9175,
+            'longitude' => 107.6191,
+            'address'   => 'Jl. Telkom, Bandung',
         ]);
 
         $this->browse(function ($browser) use ($user): void {
@@ -27,22 +30,25 @@ class CheckoutTest extends DuskTestCase
                     ->click('@proceed-to-checkout')
                     ->type('delivery_name','test')
                     ->type('delivery_phone','676767676767')
-                    ->type('delivery_address','Jl. Telkomsel')
+                    // delivery_address is readonly — auto-filled from map pin
                     ->click('@proceed-to-payment')
                     ->waitForText('Complete Your Payment')
                     ->click('@qris-method-btn')
                     ->click('@confirm-pay-btn')
                     ->waitFor('@qris-qr-image')
                     ->assertVisible('@qris-qr-image');
-                    #SucessfulCheckoutCheckQR                   
+                    #SucessfulCheckoutCheckQR
         });
     }
-    
+
      public function testCheckoutPhoneFail(): void
-    {
-        $user = User::factory()->create([
-            'role'=>'customer',
-        ]);
+     {
+         $user = User::factory()->create([
+             'role'      => 'customer',
+             'latitude'  => -6.9175,
+             'longitude' => 107.6191,
+             'address'   => 'Jl. Telkom, Bandung',
+         ]);
 
         $this->browse(function ($browser) use ($user): void {
             $browser->LoginAs($user)
@@ -56,14 +62,14 @@ class CheckoutTest extends DuskTestCase
                     ->click('@proceed-to-checkout')
                     ->type('delivery_name','test')
                     ->type('delivery_phone','324')
-                    ->type('delivery_address','Jl. Telkomsel')
+                    // delivery_address is readonly — auto-filled from map pin
                     ->click('@proceed-to-payment')
                     ->waitForText('The delivery phone field must be between 7 and 16 digits.');
                     #failPhoneNumber
-        }); 
-    }  
+        });
+    }
 
-    
+
     public function testCheckoutFormFail(): void
     {
         $user = User::factory()->create([
@@ -81,7 +87,7 @@ class CheckoutTest extends DuskTestCase
                     ->assertPathIs('/cart')
                     ->click('@proceed-to-checkout')
                     ->assertPathIs('/checkout');
-                    #CheckoutFormFail         
+                    #CheckoutFormFail
         });
     }
 }

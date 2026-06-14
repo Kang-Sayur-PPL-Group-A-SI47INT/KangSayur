@@ -32,11 +32,10 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->assertPathIs('/farmer/profile')
                 ->type('name', 'Pak Tani Sukses')
                 ->type('farm_description', 'Kebun hidroponik modern dengan teknologi IoT.')
-                ->type('city', 'Bandung')
-                ->type('address', 'Jl. Kebun Hijau No. 45, Lembang')
+                // city and address are readonly — auto-filled from map pin
                 ->type('farmer-mapp-search', 'telkom indonesia') // 'search' is the name or CSS selector of the input
-                ->pause(1000)                
-                ->keys('input[name="farmer-mapp-search"]', '{enter}') 
+                ->pause(1000)
+                ->keys('input[name="farmer-mapp-search"]', '{enter}')
                 ->pause(2000)
                 ->assertSee("-8.67233730, 115.22623390")
                 ->press('Simpan Perubahan')
@@ -66,10 +65,9 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->assertPathIs('/farmer/profile')
                 ->type('name', '')
                 ->type('farm_description', 'Kebun hidroponik modern dengan teknologi IoT.')
-                ->type('city', 'Bandung')
-                ->type('address', 'Jl. Kebun Hijau No. 45, Lembang')
+                // city and address are readonly — auto-filled from map pin
                 ->type('farmer-mapp-search', 'telkom indonesia') // 'search' is the name or CSS selector of the input
-                ->keys('input[name="farmer-mapp-search"]', '{enter}') 
+                ->keys('input[name="farmer-mapp-search"]', '{enter}')
                 ->pause(1000)
                 ->press('Simpan Perubahan')
                 ->assertPathIs('/farmer/profile')
@@ -95,8 +93,7 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->assertPathIs('/farmer/profile')
                 ->type('name', str_repeat('A', 50))
                 ->type('farm_description', 'Test description')
-                ->type('city', 'Bandung')
-                ->type('address', 'Jl. Test No. 1')
+                // city and address are readonly — auto-filled from map pin
                 ->press('Simpan Perubahan')
                 ->assertPathIs('/farmer/profile')
                 ->assertDontSee('Profil berhasil diperbarui.')
