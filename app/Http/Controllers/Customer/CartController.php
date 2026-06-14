@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Listing;
+use App\Models\Offer;
 use App\Services\DeliveryFeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +20,7 @@ class CartController extends Controller
         $cart->load([
             'items.listing.farmer',
             'items.listing.produce',
-            
+            'items.offer',
         ]);
         // Calculate totals
         $subtotal = $cart->totalPrice();
@@ -61,10 +62,35 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Produk ini tidak tersedia saat ini.');
         }
         $cart = auth()->user()->getOrCreateCart();
-        // Check if item already exists in cart
-        $existingItem = $cart->items()
-            ->where('listing_listing_id', $listing->listing_id)
-            ->first();
+
+        $offerId = $request->offer_id ?? null;
+
+        // Validate offer is accepted and belongs to this user/listing
+        if ($offerId) {
+            $offer = Offer::find($offerId);
+            if (!$offer || !$offer->isAccepted()) {
+                return redirect()->back()->with('error', 'This offer has not been accepted yet.');
+            }
+            if ($offer->user_user_id !== auth()->id()) {
+                return redirect()->back()->with('error', 'This offer does not belong to you.');
+            }
+            if ($offer->listing_listing_id !== $listing->listing_id) {
+                return redirect()->back()->with('error', 'Offer does not match this product.');
+            }
+        }
+
+        // Check if item already exists in cart (match by listing AND offer)
+        $query = $cart->items()
+            ->where('listing_listing_id', $listing->listing_id);
+
+        if ($offerId) {
+            $query->where('offer_offer_id', $offerId);
+        } else {
+            $query->whereNull('offer_offer_id');
+        }
+
+        $existingItem = $query->first();
+
         $requestedQty = $request->quantity;
         $currentCartQty = $existingItem ? $existingItem->quantity : 0;
         $totalQty = $currentCartQty + $requestedQty;
@@ -74,14 +100,13 @@ class CartController extends Controller
                 ->with('error', "Stok tidak mencukupi. Tersedia: {$listing->quantity} {$listing->unit}, di keranjang: {$currentCartQty}.");
         }
         if ($existingItem) {
-
             $existingItem->increment('quantity', $requestedQty);
         } else {
             CartItem::create([
                 'quantity' => $requestedQty,
                 'cart_cart_id' => $cart->cart_id,
                 'listing_listing_id' => $listing->listing_id,
-                'offer_offer_id' => $request->offer_id ?? null,
+                'offer_offer_id' => $offerId,
             ]);
         }
         return redirect()->back()->with('success', 'Item added to cart!');

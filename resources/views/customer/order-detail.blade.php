@@ -128,6 +128,123 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- Rate & Review Section (PBI 25 + 28) — only for delivered orders --}}
+                @if($transaction->status === 'delivered')
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50/50 to-yellow-50/50">
+                            <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                Rate Your Order
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-1">Share your experience with the products you purchased</p>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            @foreach($transaction->items as $item)
+                                @if($item->listing)
+                                    @php
+                                        $existingRating = $existingRatings->get($item->listing_listing_id);
+                                    @endphp
+                                    <div class="p-5">
+                                        {{-- Product info --}}
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-xl overflow-hidden flex-shrink-0">
+                                                @php $imgs = $item->listing->getImagesArray(); @endphp
+                                                @if(count($imgs))
+                                                    <img src="{{ asset('storage/' . $imgs[0]) }}" class="w-full h-full object-cover rounded-xl" alt="">
+                                                @else
+                                                    @php $emojis = ['🥬','🥕','🍅','🌽','🥦','🍆','🥒','🫑']; @endphp
+                                                    {{ $emojis[$loop->index % count($emojis)] }}
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900 text-sm">{{ $item->listing->title }}</h4>
+                                                <p class="text-xs text-gray-500">{{ $item->listing->farmer->name ?? 'Local Farmer' }}</p>
+                                            </div>
+                                        </div>
+
+                                        @if($existingRating)
+                                            {{-- Show existing review with delete option (PBI 28) --}}
+                                            <div class="bg-green-50 rounded-xl p-4 border-l-4 border-green-500">
+                                                <div class="flex items-start justify-between">
+                                                    <div>
+                                                        <div class="text-amber-400 text-sm">
+                                                            {{ str_repeat('★', $existingRating->score) }}{{ str_repeat('☆', 5 - $existingRating->score) }}
+                                                        </div>
+                                                        @if($existingRating->comment)
+                                                            <p class="text-gray-600 text-sm mt-2">{{ $existingRating->comment }}</p>
+                                                        @endif
+                                                        <p class="text-xs text-gray-400 mt-1">Reviewed {{ $existingRating->created_at->diffForHumans() }}</p>
+                                                    </div>
+                                                    <form action="{{ route('ratings.destroy', $existingRating->rating_id) }}" method="POST"
+                                                          onsubmit="return confirm('Are you sure you want to delete this review?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" dusk="delete-review-{{ $item->listing_listing_id }}"
+                                                                class="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition-colors">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @else
+                                            {{-- Review form (PBI 25) --}}
+                                            <form method="POST" action="{{ route('ratings.store') }}"
+                                                  x-data="{ score: 0, hoveredScore: 0 }"
+                                                  class="space-y-3"
+                                                  dusk="review-form-{{ $item->listing_listing_id }}">
+                                                @csrf
+                                                <input type="hidden" name="listing_listing_id" value="{{ $item->listing_listing_id }}">
+                                                <input type="hidden" name="transaction_transaction_id" value="{{ $transaction->transaction_id }}">
+                                                <input type="hidden" name="score" x-model="score">
+
+                                                {{-- Star Selector --}}
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Your Rating</label>
+                                                    <div class="flex items-center gap-1">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <button type="button"
+                                                                    @click="score = {{ $i }}"
+                                                                    @mouseenter="hoveredScore = {{ $i }}"
+                                                                    @mouseleave="hoveredScore = 0"
+                                                                    class="text-3xl transition-all duration-150 transform hover:scale-110 focus:outline-none"
+                                                                    :class="(hoveredScore >= {{ $i }} || score >= {{ $i }}) ? 'text-amber-400' : 'text-gray-300'"
+                                                                    dusk="star-{{ $i }}-{{ $item->listing_listing_id }}">
+                                                                ★
+                                                            </button>
+                                                        @endfor
+                                                        <span class="ml-2 text-sm text-gray-500"
+                                                              x-text="score > 0 ? score + '/5' : 'Tap to rate'"
+                                                              x-bind:class="score > 0 ? 'text-amber-600 font-semibold' : 'text-gray-400'"></span>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Comment --}}
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Your Review <span class="text-gray-400 font-normal normal-case">(optional)</span></label>
+                                                    <textarea name="comment" rows="3" maxlength="1000"
+                                                              placeholder="Share your experience with this product..."
+                                                              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-200 resize-none transition-all"></textarea>
+                                                </div>
+
+                                                {{-- Submit --}}
+                                                <button type="submit"
+                                                        x-bind:disabled="score === 0"
+                                                        class="w-full py-2.5 bg-green-800 text-white text-sm font-bold rounded-xl hover:bg-green-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                                        dusk="submit-review-{{ $item->listing_listing_id }}">
+                                                    Submit Review
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             {{-- RIGHT: Summary + Delivery --}}

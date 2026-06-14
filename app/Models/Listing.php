@@ -84,6 +84,10 @@ class Listing extends Model
     {
         return $this->status === 'active';
     }
+    public function harvestSchedules()
+    {
+        return $this->hasMany(HarvestSchedule::class, 'listing_id', 'listing_id');
+    }
     /**
      * Check if listing has active (pending/paid) orders.
      */

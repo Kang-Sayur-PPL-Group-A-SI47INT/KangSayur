@@ -36,7 +36,7 @@
                                         Marketplace
                                     </a>
                                     @if(auth()->user()->isCustomer())
-                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
                                             Negotiations
                                         </a>
                                         <a href="{{ route('customer.favorites') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.favorites') ? 'nav-link-active' : 'nav-link' }}">
@@ -45,15 +45,21 @@
                                         <a href="{{ route('customer.orders') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.orders*') ? 'nav-link-active' : 'nav-link' }}" dusk="orders-button">
                                             Orders
                                         </a>
+                                        <a href="{{ route('customer.harvest-calendar.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.harvest-calendar*') ? 'nav-link-active' : 'nav-link' }}">
+                                            Harvest Calendar
+                                        </a>
                                     @elseif(auth()->user()->isFarmer())
                                         <a href="{{ route('farmer.listings.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.listings*') ? 'nav-link-active' : 'nav-link' }}">
                                             My Produce
                                         </a>
-                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
-                                            Offers
+                                        <a href="{{ route('farmer.offers.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                            Negotiations
                                         </a>
                                         <a href="{{ route('farmer.orders.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.orders*') ? 'nav-link-active' : 'nav-link' }}">
                                             Orders
+                                        </a>
+                                        <a href="{{ route('farmer.harvest-calendar.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.harvest-calendar*') ? 'nav-link-active' : 'nav-link' }}">
+                                            Calendar
                                         </a>
                                     @endif
                                 </div>
@@ -75,7 +81,7 @@
 
                                 @if(auth()->user()->isCustomer())
                                     <!-- Cart Icon -->
-                                    <a href="{{ route('customer.cart') }}" dusk='cart-icon' class="relative p-2 text-gray-500 hover:text-green-700 transition-colors {{ request()->routeIs('customer.cart') ? 'text-green-700' : '' }}">
+                                    <a href="{{ route('customer.cart') }}" class="relative p-2 text-gray-500 hover:text-green-700 transition-colors {{ request()->routeIs('customer.cart') ? 'text-green-700' : '' }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
                                         @php
                                             $cartItemCount = auth()->user()->cart?->items?->count() ?? 0;
@@ -112,7 +118,7 @@
                                             <a href="{{ route('farmer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Farmer Dashboard</a>
                                             <a href="{{ route('farmer.profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Edit Profile</a>
                                         @else
-                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Offers</a>
+                                            <a href="{{ route('customer.offers') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Negotiations</a>
                                             <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">My Orders</a>
                                             <a href="{{ route('customer.favorites') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 transition-colors">Favorites</a>
                                         @endif

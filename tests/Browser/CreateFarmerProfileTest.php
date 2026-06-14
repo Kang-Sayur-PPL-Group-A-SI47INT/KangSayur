@@ -34,8 +34,11 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->type('farm_description', 'Kebun hidroponik modern dengan teknologi IoT.')
                 ->type('city', 'Bandung')
                 ->type('address', 'Jl. Kebun Hijau No. 45, Lembang')
-                ->type('latitude', '-6.81148000')
-                ->type('longitude', '107.61878000')
+                ->type('farmer-mapp-search', 'telkom indonesia') // 'search' is the name or CSS selector of the input
+                ->pause(1000)                
+                ->keys('input[name="farmer-mapp-search"]', '{enter}') 
+                ->pause(2000)
+                ->assertSee("-8.67233730, 115.22623390")
                 ->press('Simpan Perubahan')
                 ->assertPathIs('/farmer/profile')
                 ->assertSee('Profil berhasil diperbarui.')
@@ -65,11 +68,57 @@ class CreateFarmerProfileTest extends DuskTestCase
                 ->type('farm_description', 'Kebun hidroponik modern dengan teknologi IoT.')
                 ->type('city', 'Bandung')
                 ->type('address', 'Jl. Kebun Hijau No. 45, Lembang')
-                ->type('latitude', '-6.81148000')
-                ->type('longitude', '107.61878000')
+                ->type('farmer-mapp-search', 'telkom indonesia') // 'search' is the name or CSS selector of the input
+                ->keys('input[name="farmer-mapp-search"]', '{enter}') 
+                ->pause(1000)
                 ->press('Simpan Perubahan')
                 ->assertPathIs('/farmer/profile')
                 ->assertDontSee('Profil berhasil diperbarui.')
+            ;
+        });
+    }
+
+    /**
+     * Test update farmer profile fails when name exceeds max length.
+     */
+    public function test_update_farmer_profile_name_exceeds_max_length(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'farmer',
+            'verification_status' => 'verified'
+        ]);
+
+        $this->browse(function ($browser) use ($user): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/profile')
+                ->pause(1000)
+                ->assertPathIs('/farmer/profile')
+                ->type('name', str_repeat('A', 50))
+                ->type('farm_description', 'Test description')
+                ->type('city', 'Bandung')
+                ->type('address', 'Jl. Test No. 1')
+                ->press('Simpan Perubahan')
+                ->assertPathIs('/farmer/profile')
+                ->assertDontSee('Profil berhasil diperbarui.')
+            ;
+        });
+    }
+
+
+    /**
+     * Test customer cannot access farmer profile edit page.
+     */
+    public function test_customer_cannot_access_farmer_profile_edit(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'customer'
+        ]);
+
+        $this->browse(function ($browser) use ($user): void {
+            $browser->loginAs($user)
+                ->visit('/farmer/profile')
+                ->pause(1000)
+                ->assertSee('403')
             ;
         });
     }

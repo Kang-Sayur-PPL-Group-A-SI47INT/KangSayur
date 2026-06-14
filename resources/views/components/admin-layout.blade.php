@@ -41,7 +41,7 @@
                                     @endif
                                 </a>
                                 <a href="{{ route('admin.transactions.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('admin.transactions.*') ? 'nav-link-active' : 'nav-link' }}">
-                                    Transaksi
+                                    Order
                                 </a>
                             </div>
                         </div>
@@ -85,7 +85,7 @@
                     <a href="{{ route('admin.users.index') }}" class="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full {{ request()->routeIs('admin.users.*') ? 'bg-green-100 text-green-800' : 'text-gray-500' }}">Pengguna</a>
                     <a href="{{ route('admin.listings.index') }}" class="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full {{ request()->routeIs('admin.listings.*') ? 'bg-green-100 text-green-800' : 'text-gray-500' }}">Listing</a>
                     <a href="{{ route('admin.verifications.index') }}" class="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full {{ request()->routeIs('admin.verifications.*') ? 'bg-green-100 text-green-800' : 'text-gray-500' }}">Verifikasi</a>
-                    <a href="{{ route('admin.transactions.index') }}" class="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full {{ request()->routeIs('admin.transactions.*') ? 'bg-green-100 text-green-800' : 'text-gray-500' }}">Transaksi</a>
+                    <a href="{{ route('admin.transactions.index') }}" class="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full {{ request()->routeIs('admin.transactions.*') ? 'bg-green-100 text-green-800' : 'text-gray-500' }}">Order</a>
                 </div>
             </nav>
 

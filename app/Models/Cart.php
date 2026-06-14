@@ -33,7 +33,7 @@ class Cart extends Model
     public function totalPrice(): float
     {
         return $this->items->sum(function ($item) {
-            return $item->quantity * $item->listing->price;
+            return $item->subtotal();
         });
     }
 }
