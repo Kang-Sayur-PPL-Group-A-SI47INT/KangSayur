@@ -164,29 +164,105 @@
                                         </div>
 
                                         @if($existingRating)
-                                            {{-- Show existing review with delete option (PBI 28) --}}
-                                            <div class="bg-green-50 rounded-xl p-4 border-l-4 border-green-500">
-                                                <div class="flex items-start justify-between">
-                                                    <div>
-                                                        <div class="text-amber-400 text-sm">
-                                                            {{ str_repeat('★', $existingRating->score) }}{{ str_repeat('☆', 5 - $existingRating->score) }}
+                                            {{-- Show existing review with edit & delete options (PBI 28) --}}
+                                            <div class="bg-green-50 rounded-xl p-4 border-l-4 border-green-500"
+                                                 x-data="{
+                                                     editing: false,
+                                                     editScore: {{ $existingRating->score }},
+                                                     hoveredScore: 0,
+                                                     editComment: @js($existingRating->comment ?? '')
+                                                 }">
+                                                {{-- View Mode --}}
+                                                <div x-show="!editing">
+                                                    <div class="flex items-start justify-between">
+                                                        <div>
+                                                            <div class="text-amber-400 text-sm">
+                                                                {{ str_repeat('★', $existingRating->score) }}{{ str_repeat('☆', 5 - $existingRating->score) }}
+                                                            </div>
+                                                            @if($existingRating->comment)
+                                                                <p class="text-gray-600 text-sm mt-2">{{ $existingRating->comment }}</p>
+                                                            @endif
+                                                            <p class="text-xs text-gray-400 mt-1">Reviewed {{ $existingRating->created_at->diffForHumans() }}</p>
                                                         </div>
-                                                        @if($existingRating->comment)
-                                                            <p class="text-gray-600 text-sm mt-2">{{ $existingRating->comment }}</p>
-                                                        @endif
-                                                        <p class="text-xs text-gray-400 mt-1">Reviewed {{ $existingRating->created_at->diffForHumans() }}</p>
+                                                        <div class="flex items-center gap-2">
+                                                            {{-- Edit Button --}}
+                                                            <button @click="editing = true"
+                                                                    dusk="edit-review-{{ $item->listing_listing_id }}"
+                                                                    class="text-xs text-green-600 hover:text-green-800 font-medium flex items-center gap-1 transition-colors">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                                                                </svg>
+                                                                Edit
+                                                            </button>
+                                                            {{-- Delete Button --}}
+                                                            <form action="{{ route('ratings.destroy', $existingRating->rating_id) }}" method="POST"
+                                                                  onsubmit="return confirm('Are you sure you want to delete this review?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" dusk="delete-review-{{ $item->listing_listing_id }}"
+                                                                        class="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition-colors">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                    </svg>
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
-                                                    <form action="{{ route('ratings.destroy', $existingRating->rating_id) }}" method="POST"
-                                                          onsubmit="return confirm('Are you sure you want to delete this review?')">
+                                                </div>
+
+                                                {{-- Edit Mode --}}
+                                                <div x-show="editing" x-transition>
+                                                    <form method="POST" action="{{ route('ratings.update', $existingRating->rating_id) }}"
+                                                          class="space-y-3"
+                                                          dusk="edit-review-form-{{ $item->listing_listing_id }}">
                                                         @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" dusk="delete-review-{{ $item->listing_listing_id }}"
-                                                                class="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition-colors">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                            </svg>
-                                                            Delete
-                                                        </button>
+                                                        @method('PUT')
+                                                        <input type="hidden" name="score" x-model="editScore">
+
+                                                        {{-- Star Selector --}}
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Edit Rating</label>
+                                                            <div class="flex items-center gap-1">
+                                                                @for($i = 1; $i <= 5; $i++)
+                                                                    <button type="button"
+                                                                            @click="editScore = {{ $i }}"
+                                                                            @mouseenter="hoveredScore = {{ $i }}"
+                                                                            @mouseleave="hoveredScore = 0"
+                                                                            class="text-3xl transition-all duration-150 transform hover:scale-110 focus:outline-none"
+                                                                            :class="(hoveredScore >= {{ $i }} || editScore >= {{ $i }}) ? 'text-amber-400' : 'text-gray-300'"
+                                                                            dusk="edit-star-{{ $i }}-{{ $item->listing_listing_id }}">
+                                                                        ★
+                                                                    </button>
+                                                                @endfor
+                                                                <span class="ml-2 text-sm font-semibold text-amber-600"
+                                                                      x-text="editScore + '/5'"></span>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Comment --}}
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Edit Review <span class="text-gray-400 font-normal normal-case">(optional)</span></label>
+                                                            <textarea name="comment" rows="3" maxlength="1000"
+                                                                      x-model="editComment"
+                                                                      placeholder="Share your experience with this product..."
+                                                                      class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-200 resize-none transition-all bg-white"></textarea>
+                                                        </div>
+
+                                                        {{-- Action Buttons --}}
+                                                        <div class="flex items-center gap-2">
+                                                            <button type="submit"
+                                                                    x-bind:disabled="editScore === 0"
+                                                                    class="flex-1 py-2.5 bg-green-800 text-white text-sm font-bold rounded-xl hover:bg-green-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                                                    dusk="submit-edit-review-{{ $item->listing_listing_id }}">
+                                                                Update Review
+                                                            </button>
+                                                            <button type="button"
+                                                                    @click="editing = false; editScore = {{ $existingRating->score }}; editComment = @js($existingRating->comment ?? '')"
+                                                                    class="py-2.5 px-4 bg-gray-100 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-200 transition-all">
+                                                                Cancel
+                                                            </button>
+                                                        </div>
                                                     </form>
                                                 </div>
                                             </div>

@@ -64,6 +64,26 @@ class RatingController extends Controller
     }
 
 
+    public function update(Request $request, Rating $rating)
+    {
+        if ($rating->user_user_id !== auth()->user()->user_id) {
+            abort(403, 'You can only edit your own reviews.');
+        }
+
+        $request->validate([
+            'score'   => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        $rating->update([
+            'score'   => $request->score,
+            'comment' => $request->comment,
+        ]);
+
+        return redirect()->back()->with('success', 'Your review has been updated! ✏️');
+    }
+
+
     public function destroy(Rating $rating)
     {
         if ($rating->user_user_id !== auth()->user()->user_id) {

@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
 // Rating & Review routes (PBI 25-28)
 Route::middleware(['auth'])->group(function () {
     Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+    Route::put('/ratings/{rating}', [RatingController::class, 'update'])->name('ratings.update');
     Route::delete('/ratings/{rating}', [RatingController::class, 'destroy'])->name('ratings.destroy');
     Route::get('/marketplace/{listing}/reviews', [RatingController::class, 'index'])->name('marketplace.reviews');
 });
