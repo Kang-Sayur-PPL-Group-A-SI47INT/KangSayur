@@ -37,6 +37,7 @@
                                     </a>
                                     @if(auth()->user()->isCustomer())
                                         <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                        <a href="{{ route('customer.offers') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.offers*') ? 'nav-link-active' : 'nav-link' }}">
                                             Negotiations
                                         </a>
                                         <a href="{{ route('customer.wishlist') }}" class="px-4 py-2 text-sm {{ request()->routeIs('customer.wishlist') ? 'nav-link-active' : 'nav-link' }}">
@@ -49,8 +50,8 @@
                                         <a href="{{ route('farmer.listings.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.listings*') ? 'nav-link-active' : 'nav-link' }}">
                                             My Produce
                                         </a>
-                                        <a href="#" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
-                                            Offers
+                                        <a href="{{ route('farmer.offers.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.offers*') ? 'nav-link-active' : 'nav-link' }}">
+                                            Negotiations
                                         </a>
                                         <a href="{{ route('farmer.orders.index') }}" class="px-4 py-2 text-sm {{ request()->routeIs('farmer.orders*') ? 'nav-link-active' : 'nav-link' }}">
                                             Orders
